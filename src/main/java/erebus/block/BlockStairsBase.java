@@ -1,8 +1,8 @@
 package erebus.block;
 
+import erebus.ModTabs;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
-import erebus.ModTabs;
 
 public class BlockStairsBase extends BlockStairs {
 
@@ -10,6 +10,7 @@ public class BlockStairsBase extends BlockStairs {
 		super(block, meta);
 		setHardness(2.0F);
 		setLightOpacity(0);
+		setStepSound(block.stepSound);
 		setCreativeTab(ModTabs.blocks);
 	}
 }

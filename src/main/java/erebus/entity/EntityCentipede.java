@@ -1,6 +1,8 @@
 package erebus.entity;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
@@ -10,16 +12,16 @@ import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.entity.ai.EntityErebusAIAttackOnCollide;
 import erebus.item.ItemMaterials;
 
 public class EntityCentipede extends EntityMob {
-
-	public int skin = rand.nextInt(3);
 
 	public EntityCentipede(World world) {
 		super(world);
@@ -34,11 +36,17 @@ public class EntityCentipede extends EntityMob {
 	}
 
 	@Override
+	protected void entityInit() {
+		super.entityInit();
+		dataWatcher.addObject(30, new Integer(rand.nextInt(3)));
+	}
+
+	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(1.0D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(25.0D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(getAttackStrength());
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 25D : 25D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? getAttackStrength() : getAttackStrength() * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 	}
 
@@ -105,27 +113,57 @@ public class EntityCentipede extends EntityMob {
 		int chance = rand.nextInt(4) + rand.nextInt(1 + looting);
 		int amount;
 		for (amount = 0; amount < chance; ++amount) {
-			entityDropItem(ItemMaterials.DATA.bioVelocity.createStack(), 0.0F);
-			entityDropItem(ItemMaterials.DATA.poisonGland.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.BIO_VELOCITY.makeStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.POISON_GLAND.makeStack(), 0.0F);
 		}
 	}
 
 	@Override
 	protected void dropRareDrop(int looting) {
-		entityDropItem(ItemMaterials.DATA.supernaturalvelocity.createStack(), 0.0F);
+		entityDropItem(ItemMaterials.DATA.SUPERNATURAL_VELOCITY.makeStack(), 0.0F);
 	}
 
 	@Override
-	public void onCollideWithPlayer(EntityPlayer player) {
-		super.onCollideWithPlayer(player);
-		if (player.boundingBox.maxY >= boundingBox.minY && player.boundingBox.minY <= boundingBox.maxY) {
-			byte duration = 0;
-			if (worldObj.difficultySetting == EnumDifficulty.NORMAL)
-				duration = 7;
-			else if (worldObj.difficultySetting == EnumDifficulty.HARD)
-				duration = 15;
-			if (duration > 0)
-				player.addPotionEffect(new PotionEffect(Potion.poison.id, duration * 20, 0));
-		}
+	public boolean attackEntityAsMob(Entity entity) {
+		if (super.attackEntityAsMob(entity)) {
+			if (entity instanceof EntityLivingBase) {
+				byte duration = 0;
+
+				if (worldObj.difficultySetting.ordinal() > EnumDifficulty.EASY.ordinal())
+					if (worldObj.difficultySetting == EnumDifficulty.NORMAL)
+						duration = 7;
+					else if (worldObj.difficultySetting == EnumDifficulty.HARD)
+						duration = 15;
+
+				if (duration > 0)
+					((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.poison.id, duration * 20, 0));
+			}
+
+			return true;
+		} else
+			return false;
+	}
+
+	public void setSkin(int skinType) {
+		dataWatcher.updateObject(30, new Integer(skinType));
+	}
+
+	@Override
+	public void writeEntityToNBT(NBTTagCompound nbt) {
+		super.writeEntityToNBT(nbt);
+		nbt.setInteger("skin", getSkin());
+	}
+
+	@Override
+	public void readEntityFromNBT(NBTTagCompound nbt) {
+		super.readEntityFromNBT(nbt);
+		if (nbt.hasKey("skin"))
+			setSkin(nbt.getInteger("skin"));
+		else
+			setSkin(rand.nextInt(3));
+	}
+
+	public int getSkin() {
+		return dataWatcher.getWatchableObjectInt(30);
 	}
 }

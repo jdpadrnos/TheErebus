@@ -15,13 +15,13 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import erebus.client.render.entity.AnimationMathHelper;
+import erebus.core.handler.configs.ConfigHandler;
 
 public class EntityMoth extends EntityAmbientCreature {
 
 	private ChunkCoordinates currentFlightTarget;
 	public float wingFloat;
 	AnimationMathHelper mathWings = new AnimationMathHelper();
-	public int skin = rand.nextInt(3);
 
 	public EntityMoth(World world) {
 		super(world);
@@ -33,12 +33,13 @@ public class EntityMoth extends EntityAmbientCreature {
 	protected void entityInit() {
 		super.entityInit();
 		dataWatcher.addObject(16, new Byte((byte) 0));
+		dataWatcher.addObject(30, new Integer(rand.nextInt(3)));
 	}
 
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(4.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 4D : 4D * ConfigHandler.INSTANCE.mobHealthMultipier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
 	}
 
@@ -176,12 +177,25 @@ public class EntityMoth extends EntityAmbientCreature {
 	public void readEntityFromNBT(NBTTagCompound nbt) {
 		super.readEntityFromNBT(nbt);
 		dataWatcher.updateObject(16, Byte.valueOf(nbt.getByte("MothFlags")));
+		if (nbt.hasKey("skin"))
+			setSkin(nbt.getInteger("skin"));
+		else
+			setSkin(rand.nextInt(3));
 	}
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound nbt) {
 		super.writeEntityToNBT(nbt);
 		nbt.setByte("mothFlags", dataWatcher.getWatchableObjectByte(16));
+		nbt.setInteger("skin", getSkin());
+	}
+
+	public void setSkin(int skinType) {
+		dataWatcher.updateObject(30, new Integer(skinType));
+	}
+
+	public int getSkin() {
+		return dataWatcher.getWatchableObjectInt(30);
 	}
 
 	@Override

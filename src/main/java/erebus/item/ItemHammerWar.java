@@ -2,6 +2,16 @@ package erebus.item;
 
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import erebus.ModItems;
+import erebus.ModMaterials;
+import erebus.ModTabs;
+import erebus.item.ItemMaterials.DATA;
+import erebus.network.PacketPipeline;
+import erebus.network.client.PacketParticle;
+import erebus.network.client.PacketParticle.ParticleType;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,14 +21,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import erebus.ModMaterials;
-import erebus.ModTabs;
-import erebus.network.PacketPipeline;
-import erebus.network.client.PacketParticle;
-import erebus.network.client.PacketParticle.ParticleType;
 
 public class ItemHammerWar extends ItemSword {
 
@@ -26,15 +30,25 @@ public class ItemHammerWar extends ItemSword {
 		super(ModMaterials.weaponWarHammer);
 		setMaxStackSize(1);
 		setCreativeTab(ModTabs.gears);
+		setUnlocalizedName("erebus.warHammer");
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack is, EntityPlayer player, List list, boolean flag) {
-		list.add("Hold Right mouse button to charge up.");
-		list.add("Sneak + Right Click on top of Block");
-		list.add("to use A.O.E. attack.");
+		list.add(StatCollector.translateToLocal("tooltip.erebus.warhammer_1"));
+		list.add(StatCollector.translateToLocal("tooltip.erebus.warhammer_2"));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerIcons(IIconRegister reg) {
+	}
+
+	@Override
+	public boolean getIsRepairable(ItemStack armour, ItemStack material) {
+		return material.getItem() == ModItems.materials && material.getItemDamage() == DATA.REINFORCED_PLATE_EXO.ordinal();
 	}
 
 	@Override

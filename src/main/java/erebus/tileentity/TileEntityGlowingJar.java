@@ -1,12 +1,12 @@
 package erebus.tileentity;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import erebus.ModItems;
 import erebus.item.ItemMaterials;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityGlowingJar extends TileEntity {
 
@@ -18,7 +18,7 @@ public class TileEntityGlowingJar extends TileEntity {
 		if (ghostItem == null) {
 			ghostItem = new EntityItem(worldObj);
 			ghostItem.hoverStart = 0.0F;
-			ghostItem.setEntityItemStack(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.bioLuminescence.ordinal()));
+			ghostItem.setEntityItemStack(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.BIO_LUMINESCENCE.ordinal()));
 		}
 		return ghostItem;
 	}

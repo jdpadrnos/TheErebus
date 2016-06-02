@@ -10,6 +10,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import erebus.ModBiomes;
 import erebus.ModBlocks;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.world.SpawnerErebus.SpawnEntry;
 import erebus.world.biomes.decorators.BiomeDecoratorBaseErebus;
 import erebus.world.loot.IWeightProvider;
@@ -57,7 +58,10 @@ public abstract class BiomeBaseErebus extends BiomeGenBase implements IWeightPro
 	}
 
 	protected final BiomeBaseErebus setFog(int red, int green, int blue) {
-		fogColorRGB = new short[] { (short) red, (short) green, (short) blue };
+		if(ConfigHandler.INSTANCE.biomeFogColours)
+			fogColorRGB = new short[] { (short) red, (short) green, (short) blue };
+		else
+			fogColorRGB = new short[] { 0, 0, 0 };
 		return this;
 	}
 

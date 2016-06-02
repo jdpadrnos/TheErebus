@@ -1,27 +1,33 @@
 package erebus;
 
-import erebus.item.ItemSpawnEggs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.biome.BiomeGenBase;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import erebus.api.ErebusAPI;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.entity.EntityAnimatedBambooCrate;
 import erebus.entity.EntityAnimatedBlock;
 import erebus.entity.EntityAnimatedChest;
 import erebus.entity.EntityAntlion;
 import erebus.entity.EntityAntlionBoss;
 import erebus.entity.EntityAntlionMiniBoss;
+import erebus.entity.EntityArmchairMount;
+import erebus.entity.EntityBedBug;
 import erebus.entity.EntityBeetle;
 import erebus.entity.EntityBeetleLarva;
 import erebus.entity.EntityBlackAnt;
 import erebus.entity.EntityBlackWidow;
 import erebus.entity.EntityBloodSnail;
+import erebus.entity.EntityBombardierBeetle;
+import erebus.entity.EntityBombardierBeetleLarva;
 import erebus.entity.EntityBotFly;
 import erebus.entity.EntityBotFlyLarva;
 import erebus.entity.EntityCentipede;
 import erebus.entity.EntityChameleonTick;
 import erebus.entity.EntityCicada;
+import erebus.entity.EntityCrushling;
 import erebus.entity.EntityCrushroom;
 import erebus.entity.EntityDragonfly;
 import erebus.entity.EntityExtractedBlock;
@@ -33,6 +39,7 @@ import erebus.entity.EntityGasVent;
 import erebus.entity.EntityGlowWorm;
 import erebus.entity.EntityGooBall;
 import erebus.entity.EntityGrasshopper;
+import erebus.entity.EntityHoneyPotAnt;
 import erebus.entity.EntityJumpingSpider;
 import erebus.entity.EntityLavaWebSpider;
 import erebus.entity.EntityLeech;
@@ -46,6 +53,7 @@ import erebus.entity.EntityMucusBombPrimed;
 import erebus.entity.EntityPoisonJet;
 import erebus.entity.EntityPondSkater;
 import erebus.entity.EntityPrayingMantis;
+import erebus.entity.EntityPreservedBlock;
 import erebus.entity.EntityPunchroom;
 import erebus.entity.EntityRhinoBeetle;
 import erebus.entity.EntityScorpion;
@@ -54,7 +62,8 @@ import erebus.entity.EntitySnapper;
 import erebus.entity.EntitySolifuge;
 import erebus.entity.EntitySolifugeSmall;
 import erebus.entity.EntitySporeBall;
-import erebus.entity.EntitySporeling;
+import erebus.entity.EntitySporeJet;
+import erebus.entity.EntityStagBeetle;
 import erebus.entity.EntityTarantula;
 import erebus.entity.EntityTarantulaBaby;
 import erebus.entity.EntityTarantulaEgg;
@@ -73,7 +82,10 @@ import erebus.entity.EntityWoodlouse;
 import erebus.entity.EntityWoodlouseBall;
 import erebus.entity.EntityWorkerBee;
 import erebus.entity.EntityZombieAnt;
+import erebus.entity.EntityZombieAntSoldier;
 import erebus.entity.effect.EntityErebusLightningBolt;
+import erebus.item.ItemSpawnEggs;
+import erebus.preserved.PreservableEntityRegistry.EntityDimensions;
 
 public class ModEntities {
 	public static void init() {
@@ -95,8 +107,7 @@ public class ModEntities {
 		registerEntity(14, EntityAntlion.class, "antlion", 0x000000, 0xFFFFFF);
 		registerEntity(15, EntityBlackWidow.class, "blackWidow", 0x000000, 0xFF0000);
 		registerEntity(16, EntityGlowWorm.class, "glowWorm", 0xFFFF00, 0xFFFFFF);
-		// registerEntity(17, Free Space here.class, "bombardierBeetle",
-		// 0xFFEEFF, 0x9E0E0E);
+		registerEntity(17, EntityBombardierBeetle.class, "bombardierBeetle", 0xFFEEFF, 0x9E0E0E);
 		registerEntity(18, EntityScytodes.class, "scytodes", 0x0B4D49, 0xFFFFFF);
 		registerEntity(19, EntityMoneySpider.class, "moneySpider", 0xF5C400, 0x0B4D49);
 		registerEntity(20, EntityPrayingMantis.class, "prayingMantis", 0x06B900, 0x06B900);
@@ -108,7 +119,7 @@ public class ModEntities {
 		registerEntity(26, EntityBloodSnail.class, "bloodSnail", 0x634430, 0xFF0000);
 		registerEntity(27, EntityTitanBeetle.class, "titanBeetle", 0xF09071, 0x000000);
 		registerEntity(28, EntityBotFlyLarva.class, "botFlyLarva");
-		registerEntity(29, EntitySporeling.class, "sporeling", 0xFFFFFF, 0xFF0000);
+		registerEntity(29, EntityCrushling.class, "crushling", 0xFFFFFF, 0xFF0000);
 		registerEntity(30, EntityWheatWeevil.class, "wheatWeevil", 0x000000, 0xFFA200);
 		registerEntity(31, EntityWoodlouse.class, "woodlouse", 0x747474, 0x222222);
 		registerEntity(32, EntityCicada.class, "cicada", 0x747474, 0xFFA200);
@@ -137,6 +148,11 @@ public class ModEntities {
 		registerEntity(55, EntityMucusBombPrimed.class, "mucusBombPrimed");
 		registerEntity(56, EntityUmberGolemDungeonTypes.class, "umberGolemIdol");
 		registerEntity(57, EntityAntlionBoss.class, "antlionBoss", 0x000000, 0xFFFFFF);
+		registerEntity(58, EntityHoneyPotAnt.class, "honeyPotAnt", 0xFFA400, 0x000000);
+		registerEntity(59, EntityBombardierBeetleLarva.class, "bombardierBeetleLarva", 0xFFEEFF, 0x9E0E0E);
+		registerEntity(60, EntityZombieAntSoldier.class, "zombieAntSoldier", 0x00FE40, 0xF09071);
+		registerEntity(61, EntityBedBug.class, "bedBug");
+		registerEntity(62, EntityStagBeetle.class, "stagBeetle", 0x222222, 0x747474);
 
 		registerEntity(70, EntityWaspDagger.class, "waspDagger");
 		registerEntity(71, EntityWebSling.class, "webSling");
@@ -149,17 +165,31 @@ public class ModEntities {
 		registerEntity(78, EntityPoisonJet.class, "poisonjet");
 		registerEntity(79, EntityGasVent.class, "gasVent");
 		registerEntity(80, EntityThrownSand.class, "thrownSand");
+		registerEntity(81, EntityPreservedBlock.class, "preservedBlock");
+		registerEntity(82, EntitySporeJet.class, "sporeJet");
+		registerEntity(83, EntityArmchairMount.class, "armchairMount");
 
 		// Spawn conditions
-		EntityRegistry.addSpawn(EntityBlackWidow.class, 100, 2, 5, EnumCreatureType.monster, BiomeGenBase.hell);
+		if (ConfigHandler.INSTANCE.netherWidows)
+			EntityRegistry.addSpawn(EntityBlackWidow.class, 100, 2, 5, EnumCreatureType.monster, BiomeGenBase.hell);
 	}
 
 	private static final void registerEntity(int id, Class<? extends Entity> entityClass, String name) {
-		EntityRegistry.registerModEntity(entityClass, name, id, Erebus.instance, 256, 1, true);
+		registerEntity(id, entityClass, name, null);
+	}
+
+	private static final void registerEntity(int id, Class<? extends Entity> entityClass, String name, EntityDimensions dimensions) {
+		EntityRegistry.registerModEntity(entityClass, name, id, Erebus.instance, 256, 3, true);
+		if (dimensions != null)
+			ErebusAPI.preservableEntityRegistry.registerEntity(entityClass, dimensions);
 	}
 
 	private static final void registerEntity(int id, Class<? extends EntityLiving> entityClass, String name, int eggBackgroundColor, int eggForegroundColor) {
-		registerEntity(id, entityClass, name);
+		registerEntity(id, entityClass, name, eggBackgroundColor, eggForegroundColor, null);
+	}
+
+	private static final void registerEntity(int id, Class<? extends EntityLiving> entityClass, String name, int eggBackgroundColor, int eggForegroundColor, EntityDimensions dimensions) {
+		registerEntity(id, entityClass, name, dimensions);
 		ItemSpawnEggs.registerSpawnEgg(entityClass, name, id, eggBackgroundColor, eggForegroundColor);
 	}
 }

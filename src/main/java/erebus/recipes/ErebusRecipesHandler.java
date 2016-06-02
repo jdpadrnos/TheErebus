@@ -1,51 +1,43 @@
 package erebus.recipes;
 
+import erebus.ModBlocks;
+import erebus.ModFluids;
+import erebus.ModItems;
+import erebus.item.ItemErebusFood.FoodType;
+import erebus.item.ItemMaterials;
+import erebus.item.ItemSmoothie.SmoothieType;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
-import erebus.ModBlocks;
-import erebus.ModFluids;
-import erebus.ModItems;
-import erebus.item.ItemFood.FoodType;
-import erebus.item.ItemMaterials;
-import erebus.item.ItemFoodSmoothie.SmoothieType;
+import net.minecraftforge.fluids.FluidRegistry;
 
 public class ErebusRecipesHandler {
 	public static void init() {
-		craftingAltar();
 		offeringAltar();
 		smoothieMaker();
 	}
 
 	private static void offeringAltar() {
-		OfferingAltarRecipe.addRecipe(ItemMaterials.DATA.gaeanGem.createStack(), "gemDiamond", "gemEmerald", new ItemStack(Blocks.obsidian));
-	}
-
-	private static void craftingAltar() {
-		CraftingAltarRecipe.addRecipe(new ItemStack(ModItems.jadeHeart), "blockJade", ItemMaterials.DATA.crimsonHeart.createStack(), "ingotGold", "ingotGold", "ingotGold", "ingotGold", "ingotGold");
-		CraftingAltarRecipe.addRecipe(new ItemStack(ModBlocks.lightningSpeedBlock), new ItemStack(ModBlocks.velocityBlock), getArray(ItemMaterials.DATA.supernaturalvelocity.createStack(), 8));
-		CraftingAltarRecipe.addRecipe(new ItemStack(ModItems.witherWebSlinger), new ItemStack(ModItems.webSlinger), new ItemStack(Blocks.soul_sand), ItemMaterials.DATA.poisonGland.createStack(), new ItemStack(ModBlocks.witherWeb), new ItemStack(ModBlocks.witherWeb), new ItemStack(ModBlocks.witherWeb));
-		CraftingAltarRecipe.addRecipe(new ItemStack(ModBlocks.umberGolemStatue), ItemMaterials.DATA.crimsonHeart.createStack(), ItemMaterials.DATA.umberGolemCore.createStack(), ItemMaterials.DATA.umberGolemClaw.createStack(), ItemMaterials.DATA.umberGolemClaw.createStack(), ItemMaterials.DATA.umberGolemHead.createStack(), ItemMaterials.DATA.umberGolemLegs.createStack());
+		OfferingAltarRecipe.addRecipe(ItemMaterials.DATA.GAEAN_GEM.makeStack(), "gemDiamond", "gemEmerald", new ItemStack(Blocks.obsidian));
 	}
 
 	private static void smoothieMaker() {
-		SmoothieMakerRecipe.addRecipe(SmoothieType.greenTeaGrasshopper.makeStack(), ModFluids.beetleJuice, new ItemStack(ModItems.food, 1, FoodType.grasshopperLegRaw.ordinal()), new ItemStack(ModItems.food, 1, FoodType.grasshopperLegRaw.ordinal()), ItemMaterials.DATA.elasticFibre.createStack(), ItemMaterials.DATA.flyWing.createStack());
-		SmoothieMakerRecipe.addRecipe(SmoothieType.moneyHoney.makeStack(), ModFluids.honey, ItemMaterials.DATA.honeyDrip.createStack(), ItemMaterials.DATA.honeyDrip.createStack(), ItemMaterials.DATA.nectar.createStack(), new ItemStack(Items.gold_nugget));
-		SmoothieMakerRecipe.addRecipe(SmoothieType.nothingInTheMiddle.makeStack(), ModFluids.beetleJuice, ItemMaterials.DATA.camoPowder.createStack(), ItemMaterials.DATA.camoPowder.createStack(), new ItemStack(ModItems.food, 1, FoodType.darkFruit.ordinal()), new ItemStack(ModItems.food, 1, FoodType.swampBerries.ordinal()));
-		SmoothieMakerRecipe.addRecipe(SmoothieType.greenGiant.makeStack(), ModFluids.antiVenom, ItemMaterials.DATA.repellent.createStack(), ItemMaterials.DATA.poisonGland.createStack(), ItemMaterials.DATA.poisonGland.createStack(), ItemMaterials.DATA.waspSting.createStack());
-		SmoothieMakerRecipe.addRecipe(SmoothieType.seedyGoodness.makeStack(), ModFluids.beetleJuice, ItemMaterials.DATA.bioVelocity.createStack(), ItemMaterials.DATA.darkFruitSeeds.createStack(), new ItemStack(Items.melon_seeds), new ItemStack(Items.pumpkin_seeds));
-		SmoothieMakerRecipe.addRecipe(SmoothieType.givinMeTheBlues.makeStack(), ModFluids.milk, ItemMaterials.DATA.weepingBluePetal.createStack(), ItemMaterials.DATA.weepingBluePetal.createStack(), "gemLapis", "gemLapis");
-		SmoothieMakerRecipe.addRecipe(SmoothieType.hotHotBaby.makeStack(), ModFluids.antiVenom, ItemMaterials.DATA.waspSting.createStack(), ItemMaterials.DATA.snapperRoot.createStack(), new ItemStack(ModBlocks.fireBloom), new ItemStack(ModBlocks.fireBloom));
-		SmoothieMakerRecipe.addRecipe(SmoothieType.dontMettleWithTheNettle.makeStack(), ModFluids.honey, ItemMaterials.DATA.nettleflowers.createStack(), ItemMaterials.DATA.nettleleaves.createStack(), ItemMaterials.DATA.jadeBerries.createStack(), ItemMaterials.DATA.plateExo.createStack());
-		SmoothieMakerRecipe.addRecipe(SmoothieType.liquidGold.makeStack(), ModFluids.milk, new ItemStack(ModItems.lifeBlood), new ItemStack(ModItems.lifeBlood), ItemMaterials.DATA.bambooShoot.createStack(), new ItemStack(Items.speckled_melon));
-		SmoothieMakerRecipe.addRecipe(SmoothieType.bryufsBrew.makeStack(), new Fluid[] { ModFluids.honey, ModFluids.milk, ModFluids.antiVenom, ModFluids.beetleJuice }, ItemMaterials.DATA.compoundEyes.createStack(), new ItemStack(ModBlocks.bulbCapped), new ItemStack(ModItems.turnip), new ItemStack(ModItems.heartBerries));
-	}
+		SmoothieMakerRecipe.addRecipe(SmoothieType.GREEN_TEA_GRASSHOPPER.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.beetleJuice, new ItemStack(ModItems.food, 1, FoodType.GRASSHOPPER_LEG_RAW.ordinal()), new ItemStack(ModItems.food, 1, FoodType.GRASSHOPPER_LEG_RAW.ordinal()), ItemMaterials.DATA.ELASTIC_FIBRE.makeStack(), ItemMaterials.DATA.FLY_WING.makeStack());
+		SmoothieMakerRecipe.addRecipe(SmoothieType.MONEY_HONEY.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.honey, ItemMaterials.DATA.HONEY_DRIP.makeStack(), ItemMaterials.DATA.HONEY_DRIP.makeStack(), ItemMaterials.DATA.NECTAR.makeStack(), new ItemStack(Items.gold_nugget));
+		SmoothieMakerRecipe.addRecipe(SmoothieType.NOTHING_IN_THE_MIDDLE.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.beetleJuice, ItemMaterials.DATA.CAMO_POWDER.makeStack(), ItemMaterials.DATA.CAMO_POWDER.makeStack(), new ItemStack(ModItems.food, 1, FoodType.DARK_FRUIT.ordinal()), new ItemStack(ModItems.food, 1, FoodType.SWAMPBERRIES.ordinal()));
+		SmoothieMakerRecipe.addRecipe(SmoothieType.GREEN_GIANT.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.antiVenom, ItemMaterials.DATA.REPELLENT.makeStack(), ItemMaterials.DATA.POISON_GLAND.makeStack(), ItemMaterials.DATA.POISON_GLAND.makeStack(), ItemMaterials.DATA.WASP_STING.makeStack());
+		SmoothieMakerRecipe.addRecipe(SmoothieType.SEEDY_GOODNESS.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.beetleJuice, ItemMaterials.DATA.BIO_VELOCITY.makeStack(), ItemMaterials.DATA.DARK_FRUIT_SEEDS.makeStack(), new ItemStack(Items.melon_seeds), new ItemStack(Items.pumpkin_seeds));
+		SmoothieMakerRecipe.addRecipe(SmoothieType.GIVIN_ME_THE_BLUES.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.milk, ItemMaterials.DATA.WEEPING_BLUE_PETAL.makeStack(), ItemMaterials.DATA.WEEPING_BLUE_PETAL.makeStack(), "gemLapis", "gemLapis");
+		SmoothieMakerRecipe.addRecipe(SmoothieType.HOT_HOT_BABY.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.antiVenom, ItemMaterials.DATA.WASP_STING.makeStack(), ItemMaterials.DATA.SNAPPER_ROOT.makeStack(), new ItemStack(ModBlocks.fireBloom), new ItemStack(ModBlocks.fireBloom));
+		SmoothieMakerRecipe.addRecipe(SmoothieType.DONT_MEDDLE_WITH_THE_NETTLE.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.honey, ItemMaterials.DATA.NETTLE_FLOWERS.makeStack(), ItemMaterials.DATA.NETTLE_LEAVES.makeStack(), ItemMaterials.DATA.JADE_BERRIES.makeStack(), ItemMaterials.DATA.PLATE_EXO.makeStack());
+		SmoothieMakerRecipe.addRecipe(SmoothieType.LIQUID_GOLD.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), ModFluids.milk, new ItemStack(ModItems.lifeBlood), new ItemStack(ModItems.lifeBlood), ItemMaterials.DATA.BAMBOO_SHOOT.makeStack(), new ItemStack(Items.speckled_melon));
+		SmoothieMakerRecipe.addRecipe(SmoothieType.BRYUFS_BREW.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), new Fluid[] { ModFluids.honey, ModFluids.milk, ModFluids.antiVenom, ModFluids.beetleJuice }, ItemMaterials.DATA.COMPOUND_EYES.makeStack(), ItemMaterials.DATA.TERPSISHROOM.makeStack(), new ItemStack(ModItems.turnip), new ItemStack(ModItems.heartBerries));
 
-	private static Object[] getArray(Object base, int size) {
-		Object[] array = new Object[size];
-		for (int i = 0; i < array.length; i++)
-			array[i] = base;
-		return array;
+		SmoothieMakerRecipe.addRecipe(FoodType.MELONADE.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), FluidRegistry.WATER, new ItemStack(Items.melon));
+		SmoothieMakerRecipe.addRecipe(FoodType.MELONADE_SPARKLY.makeStack(), ItemMaterials.DATA.SMOOTHIE_GLASS.makeStack(), FluidRegistry.WATER, new ItemStack(Items.speckled_melon));
+		SmoothieMakerRecipe.addRecipe(new ItemStack(ModItems.bambucketAntiVenom), new ItemStack(ModItems.bambucket), ModFluids.beetleJuice, ItemMaterials.DATA.POISON_GLAND.makeStack(), ItemMaterials.DATA.NETTLE_LEAVES.makeStack(), ItemMaterials.DATA.NETTLE_LEAVES.makeStack());
+		SmoothieMakerRecipe.addRecipe(new ItemStack(ModItems.bucketAntiVenom), new ItemStack(Items.bucket), ModFluids.beetleJuice, ItemMaterials.DATA.POISON_GLAND.makeStack(), ItemMaterials.DATA.NETTLE_LEAVES.makeStack(), ItemMaterials.DATA.NETTLE_LEAVES.makeStack());
+		SmoothieMakerRecipe.addRecipe(new ItemStack(ModItems.bottleAntiVenom, 2), new ItemStack(Items.glass_bottle, 2), ModFluids.beetleJuice, ItemMaterials.DATA.POISON_GLAND.makeStack(), ItemMaterials.DATA.NETTLE_LEAVES.makeStack(), ItemMaterials.DATA.NETTLE_LEAVES.makeStack());
 	}
 }

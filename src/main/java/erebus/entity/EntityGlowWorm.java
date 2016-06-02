@@ -1,7 +1,11 @@
 package erebus.entity;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -10,6 +14,7 @@ import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -22,6 +27,7 @@ public class EntityGlowWorm extends EntityCreature {
 	public int lastX;
 	public int lastY;
 	public int lastZ;
+	private boolean triggerOnce;
 
 	public EntityGlowWorm(World world) {
 		super(world);
@@ -34,6 +40,12 @@ public class EntityGlowWorm extends EntityCreature {
 		tasks.addTask(3, new EntityAIWander(this, 0.5D));
 		tasks.addTask(4, new EntityAIPanic(this, 0.7F));
 		tasks.addTask(5, new EntityAILookIdle(this));
+	}
+
+	@Override
+	protected void entityInit() {
+		super.entityInit();
+		dataWatcher.addObject(30, new Byte((byte) 0));
 	}
 
 	@Override
@@ -58,7 +70,7 @@ public class EntityGlowWorm extends EntityCreature {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.5D); // Movespeed
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(15.0D); // MaxHealth
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 15D : 15D * ConfigHandler.INSTANCE.mobHealthMultipier);
 	}
 
 	@Override
@@ -91,11 +103,13 @@ public class EntityGlowWorm extends EntityCreature {
 		int chance = rand.nextInt(4) + rand.nextInt(1 + looting);
 		int amount;
 		for (amount = 0; amount < chance; ++amount)
-			entityDropItem(ItemMaterials.DATA.bioLuminescence.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.BIO_LUMINESCENCE.makeStack(), 0.0F);
 	}
 
 	@Override
 	public void onUpdate() {
+		if (!worldObj.isRemote)
+			findNearEntity();
 		if (worldObj.isRemote && isGlowing())
 			lightUp(worldObj, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
 		if (worldObj.isRemote && !isGlowing())
@@ -117,18 +131,43 @@ public class EntityGlowWorm extends EntityCreature {
 						lastY = y;
 						lastZ = z;
 					}
+		triggerOnce = true;
 	}
 
 	@SideOnly(Side.CLIENT)
 	private void switchOff() {
 		if (!ConfigHandler.INSTANCE.bioluminescence)
 			return;
-		worldObj.updateLightByType(EnumSkyBlock.Block, lastX, lastY, lastZ);
-		worldObj.updateLightByType(EnumSkyBlock.Block, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
+		if(triggerOnce) {
+			worldObj.updateLightByType(EnumSkyBlock.Block, lastX, lastY, lastZ);
+			worldObj.updateLightByType(EnumSkyBlock.Block, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
+			triggerOnce = false;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Entity findNearEntity() {
+		List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox(posX - 0.5D, posY - 0.5D, posZ - 0.5D, posX + 0.5D, posY + 0.5D, posZ + 0.5D).expand(8D, 8D, 8D));
+		for (int i = 0; i < list.size(); i++) {
+			Entity entity = list.get(i);
+			if (entity != null && !getIsNearEntity())
+				setIsNearEntity(true);
+		}
+		if (list.isEmpty() && getIsNearEntity())
+			setIsNearEntity(false);
+		return null;
 	}
 
 	public boolean isGlowing() {
-		return worldObj.getSunBrightness(1.0F) < 0.5F;
+		return worldObj.getSunBrightness(1.0F) < 0.5F && getIsNearEntity();
+	}
+
+	public void setIsNearEntity(boolean entityNear) {
+		dataWatcher.updateObject(30, entityNear ? (byte) 1 : (byte) 0);
+	}
+
+	public boolean getIsNearEntity() {
+		return dataWatcher.getWatchableObjectByte(30) == 1 ? true : false;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package erebus.tileentity;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.StatCollector;
 import erebus.entity.EntityAnimatedChest;
 
 public class TileEntityAnimatedChest extends TileEntityBasicInventory {
@@ -9,7 +10,7 @@ public class TileEntityAnimatedChest extends TileEntityBasicInventory {
 	protected EntityAnimatedChest chester;
 
 	public TileEntityAnimatedChest(EntityAnimatedChest chest) {
-		super(chest.inventory.length, "Chester");
+		super(chest.inventory.length, StatCollector.translateToLocal("container.animatedChest"));
 		inventory = chest.inventory;
 		chester = chest;
 	}

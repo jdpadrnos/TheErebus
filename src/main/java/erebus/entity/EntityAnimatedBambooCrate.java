@@ -1,6 +1,5 @@
 package erebus.entity;
 
-import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -12,6 +11,7 @@ import erebus.Erebus;
 import erebus.ModItems;
 import erebus.core.helper.Utils;
 import erebus.core.proxy.CommonProxy;
+import erebus.entity.ai.EntityAIBlockFollowOwner;
 import erebus.tileentity.TileEntityBambooCrate;
 
 public class EntityAnimatedBambooCrate extends EntityAnimatedBlock implements IInventory {
@@ -24,7 +24,8 @@ public class EntityAnimatedBambooCrate extends EntityAnimatedBlock implements II
 		tasks.removeTask(aiWander);
 		tasks.removeTask(aiAttackOnCollide);
 		tasks.removeTask(aiAttackNearestTarget);
-		tasks.addTask(1, new EntityAITempt(this, 1.0D, ModItems.wandOfAnimation, false));
+		tasks.addTask(1, new EntityAIBlockFollowOwner(this, 1.0D, 10.0F, 2.0F));
+		isImmuneToFire = true;
 	}
 
 	public EntityAnimatedBambooCrate setContents(IInventory chest) {
@@ -69,9 +70,11 @@ public class EntityAnimatedBambooCrate extends EntityAnimatedBlock implements II
 			TileEntityBambooCrate chest = Utils.getTileEntity(worldObj, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ), TileEntityBambooCrate.class);
 			for (int i = 0; i < chest.getSizeInventory(); i++)
 				chest.setInventorySlotContents(i, inventory[i]);
+			worldObj.notifyBlocksOfNeighborChange(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ), blockID);
+			worldObj.markBlockForUpdate(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
 			return true;
 		} else {
-			player.openGui(Erebus.instance, CommonProxy.GUI_ID_ANIMATED_BAMBOO_CRATE, player.worldObj, getEntityId(), 0, 0);
+			player.openGui(Erebus.instance, CommonProxy.GuiID.ANIMATED_BAMBOO_CRATE.ordinal(), player.worldObj, getEntityId(), 0, 0);
 			return true;
 		}
 	}
@@ -143,7 +146,7 @@ public class EntityAnimatedBambooCrate extends EntityAnimatedBlock implements II
 
 	@Override
 	public String getInventoryName() {
-		return "container.bamber";
+		return "container.animatedBambooCrate";
 	}
 
 	@Override
@@ -190,5 +193,9 @@ public class EntityAnimatedBambooCrate extends EntityAnimatedBlock implements II
 	public void markDirty() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	protected void fall(float distance) {
 	}
 }

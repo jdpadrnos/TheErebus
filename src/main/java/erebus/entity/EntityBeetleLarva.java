@@ -1,5 +1,6 @@
 package erebus.entity;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -8,6 +9,7 @@ import net.minecraft.entity.ai.EntityAIPanic;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -16,17 +18,21 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import erebus.ModAchievements;
 import erebus.ModItems;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.entity.ai.EntityAIEatWoodenItem;
 import erebus.network.PacketPipeline;
 import erebus.network.client.PacketParticle;
 import erebus.network.client.PacketParticle.ParticleType;
 
 public class EntityBeetleLarva extends EntityAnimal {
+
 	public EntityAIEatWoodenItem aiEatWoodItem = new EntityAIEatWoodenItem(this, 0.48D, 10);
 	private final EntityAIWander aiWander = new EntityAIWander(this, 0.48D);
 	public boolean isEating;
@@ -72,7 +78,7 @@ public class EntityBeetleLarva extends EntityAnimal {
 
 	@Override
 	protected boolean canDespawn() {
-		if (getTame() != 0)
+		if (getTame() != 0 && getTame() != 4)
 			return false;
 		else
 			return true;
@@ -81,7 +87,7 @@ public class EntityBeetleLarva extends EntityAnimal {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0F);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 8D : 8D * ConfigHandler.INSTANCE.mobHealthMultipier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.35D);
 	}
 
@@ -183,6 +189,15 @@ public class EntityBeetleLarva extends EntityAnimal {
 			entityTitanBeetle.setPosition(posX, posY, posZ);
 			entityTitanBeetle.setTameState((byte) 1);
 			worldObj.spawnEntityInWorld(entityTitanBeetle);
+		} else if (getTame() == 4) {
+			EntityBombardierBeetle entityBombardierBeetle = new EntityBombardierBeetle(worldObj);
+			entityBombardierBeetle.setPosition(posX, posY, posZ);
+			worldObj.spawnEntityInWorld(entityBombardierBeetle);
+		} else if (getTame() == 5) {
+			EntityStagBeetle entityStagBeetle = new EntityStagBeetle(worldObj);
+			entityStagBeetle.setPosition(posX, posY, posZ);
+			entityStagBeetle.setTameState((byte) 1);
+			worldObj.spawnEntityInWorld(entityStagBeetle);
 		}
 	}
 
@@ -220,7 +235,7 @@ public class EntityBeetleLarva extends EntityAnimal {
 	@Override
 	public boolean interact(EntityPlayer player) {
 		ItemStack stack = player.inventory.getCurrentItem();
-		if (!worldObj.isRemote && isStick(stack)) {
+		if (!worldObj.isRemote && isStick(stack) && getTame() != 4) {
 			setLarvaSize(getLarvaSize() + 0.1F);
 			stack.stackSize--;
 			return true;
@@ -273,5 +288,27 @@ public class EntityBeetleLarva extends EntityAnimal {
 	@Override
 	public EntityAgeable createChild(EntityAgeable entityageable) {
 		return null;
+	}
+
+	@Override
+	public void onDeath(DamageSource dmgSrc) {
+		super.onDeath(dmgSrc);
+
+		if (dmgSrc instanceof EntityDamageSource) {
+			Entity killer = ((EntityDamageSource) dmgSrc).getSourceOfDamage();
+			if (killer instanceof EntityPlayer) {
+				EntityPlayer player = (EntityPlayer) killer;
+				player.triggerAchievement(ModAchievements.beetle);
+
+				for (EntityItem entityDrop : capturedDrops)
+					if (entityDrop != null) {
+						ItemStack stack = entityDrop.getEntityItem();
+						if (stack != null && stack.getItem() == Items.diamond) {
+							player.triggerAchievement(ModAchievements.diamond);
+							break;
+						}
+					}
+			}
+		}
 	}
 }

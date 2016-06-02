@@ -25,7 +25,7 @@ public class BiomeDecoratorFungalForest extends BiomeDecoratorBaseErebus {
 	private final WorldGenBigMushroom genBigMushroomBrown = new WorldGenBigMushroom(1);
 	private final WorldGenGiantMushrooms genGiantMushrooms = new WorldGenGiantMushrooms();
 
-	public static final Block[] mushrooms = { ModBlocks.dutchCap, ModBlocks.kaizerfinger, ModBlocks.bundleshroom, ModBlocks.greenMushroom, ModBlocks.bulbCapped };
+	public static final Block[] mushrooms = { ModBlocks.dutchCap, ModBlocks.kaizersFinger, ModBlocks.sarcasticCzech, ModBlocks.grandmasShoes, ModBlocks.darkCapped };
 
 	@Override
 	public void decorate() {
@@ -65,6 +65,8 @@ public class BiomeDecoratorFungalForest extends BiomeDecoratorBaseErebus {
 			int r = rand.nextInt(100);
 			if (r < 16)
 				genGiantMushrooms.setMushroomType(MushroomType.DUTCH_CAP);
+			else if (r < 25)
+				genGiantMushrooms.setMushroomType(MushroomType.SARCASTIC_CZECH);
 			else if (r < 80)
 				genGiantMushrooms.setMushroomType(MushroomType.KAIZERS_FINGERS);
 			else if (r < 96)

@@ -6,7 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
@@ -26,6 +25,8 @@ import net.minecraft.world.World;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import erebus.ModItems;
 import erebus.client.render.entity.AnimationMathHelper;
+import erebus.core.handler.configs.ConfigHandler;
+import erebus.entity.ai.EntityErebusAIAttackOnCollide;
 import erebus.item.ItemMaterials;
 
 public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData {
@@ -36,7 +37,7 @@ public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData 
 	private boolean areAttributesSetup = false;
 	public boolean waspFlying;
 	public final EntityAINearestAttackableTarget aiNearestAttackableTarget = new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true);
-	public final EntityAIAttackOnCollide aiAttackOnCollide = new EntityAIAttackOnCollide(this, EntityLivingBase.class, 0.3D, true);
+	public final EntityErebusAIAttackOnCollide aiAttackOnCollide = new EntityErebusAIAttackOnCollide(this, EntityLivingBase.class, 0.3D, true);
 
 	public EntityWasp(World world) {
 		super(world);
@@ -72,15 +73,15 @@ public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData 
 				setSize(2.5F, 2F);
 				experienceValue = 25;
 				getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.9D);
-				getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(60.0D);
-				getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(8.0D);
+				getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 60D : 60D * ConfigHandler.INSTANCE.mobHealthMultipier);
+				getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 8D : 8D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 				getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 			} else {
 				setSize(1.5F, 1.0F);
 				experienceValue = 10;
 				getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.75D);
-				getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(25.0D);
-				getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
+				getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 25D : 25D * ConfigHandler.INSTANCE.mobHealthMultipier);
+				getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 4D : 4D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 				getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 			}
 	}
@@ -101,7 +102,7 @@ public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData 
 	}
 
 	@Override
-	protected void fall(float par1) {
+	protected void fall(float amount) {
 	}
 
 	@Override
@@ -129,7 +130,7 @@ public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData 
 		int chance = rand.nextInt(4) + rand.nextInt(1 + looting);
 		int amount;
 		for (amount = 0; amount < chance; ++amount)
-			entityDropItem(ItemMaterials.DATA.waspSting.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.WASP_STING.makeStack(), 0.0F);
 		if (getIsBoss() == 1)
 			entityDropItem(new ItemStack(ModItems.bottleAntiVenom), 0.0F);
 	}
@@ -167,7 +168,7 @@ public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData 
 			motionY *= 0.6D;
 
 		if (!worldObj.isRemote) {
-			if (getEntityToAttack() == null) {
+			if (getAttackTarget() == null) {
 				if (rand.nextInt(200) == 0)
 					if (!waspFlying)
 						setWaspFlying(true);
@@ -180,8 +181,8 @@ public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData 
 					land();
 			}
 
-			if (getEntityToAttack() != null) {
-				currentFlightTarget = new ChunkCoordinates((int) getEntityToAttack().posX, (int) ((int) getEntityToAttack().posY + getEntityToAttack().getEyeHeight()), (int) getEntityToAttack().posZ);
+			if (getAttackTarget() != null) {
+				currentFlightTarget = new ChunkCoordinates((int) getAttackTarget().posX, (int) ((int) getAttackTarget().posY + getAttackTarget().getEyeHeight()), (int) getAttackTarget().posZ);
 				setWaspFlying(false);
 				flyToTarget();
 			}
@@ -220,32 +221,25 @@ public class EntityWasp extends EntityMob implements IEntityAdditionalSpawnData 
 	}
 
 	@Override
-	public void setAttackTarget(EntityLivingBase entity) {
-		setTarget(entity);
-		super.setAttackTarget(entity);
-	}
-
-	@Override
 	public boolean attackEntityAsMob(Entity entity) {
-		if (super.attackEntityAsMob(entity)) {
-			if (entity instanceof EntityLivingBase) {
-				byte var2 = 0;
-				if (worldObj.difficultySetting == EnumDifficulty.NORMAL)
-					var2 = 7;
-				else if (worldObj.difficultySetting == EnumDifficulty.HARD)
-					var2 = 15;
-				if (var2 > 0)
-					((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.poison.id, var2 * 20, 0));
+		if (canEntityBeSeen(entity)) {
+			if (super.attackEntityAsMob(entity)) {
+				if (entity instanceof EntityLivingBase) {
+					byte duration = 0;
+
+					if (worldObj.difficultySetting.ordinal() > EnumDifficulty.EASY.ordinal())
+						if (worldObj.difficultySetting == EnumDifficulty.NORMAL)
+							duration = 7;
+						else if (worldObj.difficultySetting == EnumDifficulty.HARD)
+							duration = 15;
+
+					if (duration > 0)
+						((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.poison.id, duration * 20, 0));
+				}
 			}
 			return true;
-		}
-		return false;
-	}
-
-	@Override
-	protected void attackEntity(Entity entity, float par2) {
-		if (par2 < 1.0F && entity.boundingBox.maxY > boundingBox.minY && entity.boundingBox.minY < boundingBox.maxY && getEntitySenses().canSee(entity))
-			attackEntityAsMob(entity);
+		} else
+			return false;
 	}
 
 	public byte getIsBoss() {

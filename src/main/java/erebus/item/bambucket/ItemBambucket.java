@@ -6,6 +6,8 @@ import erebus.ModItems;
 import erebus.ModTabs;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -29,6 +31,28 @@ public class ItemBambucket extends Item {
 		this.fluid = fluid;
 		setMaxStackSize(16);
 		setCreativeTab(ModTabs.specials);
+	}
+
+	@Override
+	public boolean hasContainerItem(ItemStack stack) {
+		return fluid != Blocks.air;
+	}
+
+	@Override
+	public ItemStack getContainerItem(ItemStack stack) {
+		return hasContainerItem(stack) ? new ItemStack(ModItems.bambucket) : null;
+	}
+
+	@Override
+	public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer player, EntityLivingBase entity) {
+		if (entity instanceof EntityCow) {
+			if (!player.capabilities.isCreativeMode)
+				stack.stackSize--;
+			if (!player.inventory.addItemStackToInventory(new ItemStack(ModItems.bambucketMilk)))
+				player.dropPlayerItemWithRandomChoice(new ItemStack(ModItems.bambucketMilk), false);
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -78,6 +102,11 @@ public class ItemBambucket extends Item {
 					if (block == ModBlocks.honeyBlock && meta == 0) {
 						world.setBlockToAir(x, y, z);
 						return addBucketToPlayer(stack, player, ModItems.bambucketHoney);
+					}
+
+					if (block == ModBlocks.formicAcid && meta == 0) {
+						world.setBlockToAir(x, y, z);
+						return addBucketToPlayer(stack, player, ModItems.bambucketFormicAcid);
 					}
 				} else {
 					if (pos.sideHit == 0)

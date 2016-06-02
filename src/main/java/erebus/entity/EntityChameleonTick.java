@@ -4,7 +4,6 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAISwimming;
@@ -13,15 +12,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import erebus.core.handler.configs.ConfigHandler;
+import erebus.entity.ai.EntityErebusAIAttackOnCollide;
 import erebus.item.ItemMaterials;
 
 public class EntityChameleonTick extends EntityMob {
+
 	public Block blockID;
 	public int blockMeta;
 	public int animation;
 	public boolean active = false;
 	private final EntityAINearestAttackableTarget aiAttackTarget = new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true);
-	private final EntityAIAttackOnCollide aiAttackOnCollide = new EntityAIAttackOnCollide(this, EntityPlayer.class, 0.65D, false);
+	private final EntityErebusAIAttackOnCollide aiAttackOnCollide = new EntityErebusAIAttackOnCollide(this, EntityPlayer.class, 0.65D, false);
 
 	public EntityChameleonTick(World world) {
 		super(world);
@@ -38,16 +40,11 @@ public class EntityChameleonTick extends EntityMob {
 	}
 
 	@Override
-	protected void entityInit() {
-		super.entityInit();
-	}
-
-	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.5D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(30.0D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(2.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 30D : 30D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 2D : 2D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 	}
 
@@ -71,7 +68,7 @@ public class EntityChameleonTick extends EntityMob {
 		int chance = rand.nextInt(4) + rand.nextInt(1 + looting);
 		int amount;
 		for (amount = 0; amount < chance; ++amount)
-			entityDropItem(ItemMaterials.DATA.camoPowder.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.CAMO_POWDER.makeStack(), 0.0F);
 	}
 
 	@Override
@@ -142,8 +139,7 @@ public class EntityChameleonTick extends EntityMob {
 
 	@Override
 	protected Entity findPlayerToAttack() {
-		EntityPlayer player = worldObj.getClosestVulnerablePlayerToEntity(this, 8.0D);
-		return player;
+		return worldObj.getClosestVulnerablePlayerToEntity(this, 8.0D);
 	}
 
 	@Override
@@ -151,10 +147,4 @@ public class EntityChameleonTick extends EntityMob {
 		if (distance > 0.0F && distance < 2.0F)
 			attackEntityAsMob(entity);
 	}
-
-	@Override
-	public boolean attackEntityAsMob(Entity entity) {
-		return super.attackEntityAsMob(entity);
-	}
-
 }

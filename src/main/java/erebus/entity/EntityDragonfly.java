@@ -1,6 +1,5 @@
 package erebus.entity;
 
-import java.util.Calendar;
 import java.util.Random;
 
 import net.minecraft.entity.Entity;
@@ -16,10 +15,12 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import erebus.Erebus;
 import erebus.client.render.entity.AnimationMathHelper;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.item.ItemMaterials;
 
 public class EntityDragonfly extends EntityMob {
@@ -48,9 +49,9 @@ public class EntityDragonfly extends EntityMob {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(15.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 15D : 15D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 1D : 1D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(128.0D);
 	}
 
@@ -145,7 +146,7 @@ public class EntityDragonfly extends EntityMob {
 		if (getEntityToAttack() == null)
 			flyAbout();
 		if (riddenByEntity != null)
-			if (!worldObj.isRemote && captured() && (posY > pickupHeight + 10D || countDown <= 0)) {
+			if (!worldObj.isRemote && captured() && (posY > pickupHeight + 10D || countDown <= 0 || !worldObj.isRemote && captured() && worldObj.isSideSolid(MathHelper.floor_double(posX), MathHelper.floor_double(posY + 1D), MathHelper.floor_double(posZ), ForgeDirection.UP))) {
 				setDropped(true);
 				riddenByEntity.mountEntity(null);
 			}
@@ -257,33 +258,27 @@ public class EntityDragonfly extends EntityMob {
 	@Override
 	public boolean getCanSpawnHere() {
 		int var1 = MathHelper.floor_double(boundingBox.minY);
-		if (var1 >= 63)
+		if (var1 >= 100)
 			return false;
 		else {
 			int var2 = MathHelper.floor_double(posX);
 			int var3 = MathHelper.floor_double(posZ);
 			int var4 = worldObj.getBlockLightValue(var2, var1, var3);
-			byte var5 = 4;
-			Calendar var6 = worldObj.getCurrentDate();
-			if ((var6.get(2) + 1 != 10 || var6.get(5) < 20) && (var6.get(2) + 1 != 11 || var6.get(5) > 3)) {
-				if (rand.nextBoolean())
-					return false;
-			} else
-				var5 = 7;
+			byte var5 = 7;
 			return var4 > rand.nextInt(var5) ? false : super.getCanSpawnHere();
 		}
 	}
 
 	@Override
 	public int getMaxSpawnedInChunk() {
-		return 3;
+		return 6;
 	}
 
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int looting) {
-		entityDropItem(ItemMaterials.DATA.dragonflyWing.createStack(), 0.0F);
+		entityDropItem(ItemMaterials.DATA.DRAGONFLY_WING.makeStack(), 0.0F);
 		if (rand.nextInt(5) == 0)
-			entityDropItem(ItemMaterials.DATA.compoundEyes.createStack(rand.nextInt(1) + 1 + looting), 0.0F);
+			entityDropItem(ItemMaterials.DATA.COMPOUND_EYES.makeStack(rand.nextInt(1) + 1 + looting), 0.0F);
 		if (getSkin() == 0)
 			entityDropItem(new ItemStack(Items.ender_pearl, rand.nextInt(1) + 1 + looting), 0.0F);
 	}

@@ -2,6 +2,12 @@ package erebus.block;
 
 import java.util.Random;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import erebus.ModItems;
+import erebus.ModTabs;
+import erebus.entity.effect.EntityErebusLightningBolt;
+import erebus.item.ItemDungeonIdols.IDOL;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -10,12 +16,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import erebus.ModItems;
-import erebus.ModTabs;
-import erebus.entity.effect.EntityErebusLightningBolt;
-import erebus.item.ItemDungeonIdols.IDOL;
 
 public class BlockCapstone extends Block {
 	private IIcon capstoneMud, capstoneMud1, capstoneIron, capstoneIron1, capstoneGold, capstoneGold1, capstoneJade, capstoneJade1;
@@ -88,28 +88,28 @@ public class BlockCapstone extends Block {
 				case 0:
 					return true;
 				case 1:
-					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.Mud.ordinal()) {
+					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.MUD.ordinal()) {
 						world.setBlockMetadataWithNotify(x, y, z, 5, 3);
 						if (!player.capabilities.isCreativeMode)
 							stack.stackSize--;
 					}
 					return true;
 				case 2:
-					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.Iron.ordinal()) {
+					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.IRON.ordinal()) {
 						world.setBlockMetadataWithNotify(x, y, z, 6, 3);
 						if (!player.capabilities.isCreativeMode)
 							stack.stackSize--;
 					}
 					return true;
 				case 3:
-					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.Gold.ordinal()) {
+					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.GOLD.ordinal()) {
 						world.setBlockMetadataWithNotify(x, y, z, 7, 3);
 						if (!player.capabilities.isCreativeMode)
 							stack.stackSize--;
 					}
 					return true;
 				case 4:
-					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.Jade.ordinal()) {
+					if (stack.getItem() == ModItems.idols && stack.getItemDamage() == IDOL.JADE.ordinal()) {
 						world.setBlockMetadataWithNotify(x, y, z, 8, 3);
 						if (!player.capabilities.isCreativeMode)
 							stack.stackSize--;

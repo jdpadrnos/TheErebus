@@ -1,14 +1,14 @@
 package erebus.item;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemStack;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import erebus.ModItems;
 import erebus.ModMaterials;
 import erebus.ModTabs;
 import erebus.item.ItemMaterials.DATA;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemStack;
 
 public class ItemArmorRhino extends ItemArmor {
 
@@ -28,6 +28,6 @@ public class ItemArmorRhino extends ItemArmor {
 
 	@Override
 	public boolean getIsRepairable(ItemStack armour, ItemStack material) {
-		return material.getItem() == ModItems.materials && material.getItemDamage() == DATA.plateExoRhino.ordinal();
+		return material.getItem() == ModItems.materials && material.getItemDamage() == DATA.PLATE_EXO_RHINO.ordinal();
 	}
 }

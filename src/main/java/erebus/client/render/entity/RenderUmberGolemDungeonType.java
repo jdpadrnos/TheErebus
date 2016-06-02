@@ -3,6 +3,7 @@ package erebus.client.render.entity;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.BossStatus;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
@@ -18,8 +19,9 @@ public class RenderUmberGolemDungeonType extends RenderLiving {
 	}
 
 	@Override
-	protected void preRenderCallback(EntityLivingBase entityliving, float f) {
+	protected void preRenderCallback(EntityLivingBase entity, float partialTickTime) {
 		float f1 = 1.4F;
+		BossStatus.setBossStatus((EntityUmberGolemDungeonTypes) entity, false);
 		GL11.glScalef(f1, f1, f1);
 	}
 

@@ -10,23 +10,26 @@ import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.item.ItemMaterials;
 import erebus.network.PacketPipeline;
 import erebus.network.client.PacketParticle;
 import erebus.network.client.PacketParticle.ParticleType;
 
-public class EntityCrushroom extends EntityMob implements IRangedAttackMob {
+public class EntityCrushroom extends EntityMob implements IRangedAttackMob, IBossDisplayData {
+
 	private final EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 0.75D, 40, 12.0F);
 
 	public EntityCrushroom(World world) {
 		super(world);
 		setSize(3.3F, 4F);
-		tasks.addTask(0, new EntityAIWander(this, 0.6D));
+		tasks.addTask(0, new EntityAIWander(this, 0.5D));
 		tasks.addTask(1, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
 		tasks.addTask(2, new EntityAILookIdle(this));
 		targetTasks.addTask(0, new EntityAIHurtByTarget(this, false));
@@ -36,9 +39,9 @@ public class EntityCrushroom extends EntityMob implements IRangedAttackMob {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.75D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(80.0D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(5.0D);
+		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.5D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 200D : 200D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 6D : 6D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(1.0D);
 	}
@@ -160,13 +163,13 @@ public class EntityCrushroom extends EntityMob implements IRangedAttackMob {
 		int amount = rand.nextInt(3);
 		if (fortune > 0)
 			amount += rand.nextInt(fortune + 1);
-		entityDropItem(ItemMaterials.DATA.hideShroom.createStack(amount), 0.0F);
+		entityDropItem(ItemMaterials.DATA.HIDE_SHROOM.makeStack(amount), 0.0F);
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
 	public boolean canAttackClass(Class entity) {
-		return EntityCrushroom.class != entity && EntitySporeling.class != entity && EntityZombieAnt.class != entity && EntityPunchroom.class != entity;
+		return EntityCrushroom.class != entity && EntityCrushling.class != entity && EntityZombieAnt.class != entity && EntityZombieAntSoldier.class != entity && EntityPunchroom.class != entity;
 	}
 
 	@Override
@@ -185,7 +188,7 @@ public class EntityCrushroom extends EntityMob implements IRangedAttackMob {
 		if (!worldObj.isRemote && getAttackTarget().boundingBox.maxY >= boundingBox.minY - 1.0D && getAttackTarget().boundingBox.minY <= boundingBox.maxY && getSmashCount() == 20) {
 			playSound("erebus:blamsound", 0.5F, 1.0F);
 			spawnBlamParticles();
-			getAttackTarget().attackEntityFrom(DamageSource.causeMobDamage(this), 6.0F);
+			getAttackTarget().attackEntityFrom(DamageSource.causeMobDamage(this), (float) (ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 6D : 6D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier));
 			getAttackTarget().addVelocity(-MathHelper.sin(rotationYaw * 3.141593F / 180.0F) * 0.5D, 0.2D, MathHelper.cos(rotationYaw * 3.141593F / 180.0F) * 0.5D);
 		}
 	}

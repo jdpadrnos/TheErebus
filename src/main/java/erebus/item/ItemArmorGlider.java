@@ -1,6 +1,9 @@
 package erebus.item;
 
+import java.util.List;
+
 import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,12 +11,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.common.util.Constants;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -30,15 +35,72 @@ import erebus.network.server.PacketGlider;
 import erebus.network.server.PacketGliderPowered;
 
 public class ItemArmorGlider extends ItemArmor {
-
 	public ItemArmorGlider() {
 		super(ModMaterials.armorREINEXOSPECIAL, 2, 1);
 		setCreativeTab(ModTabs.gears);
 	}
 
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean flag) {
+		if (canFly()) {
+			list.add(StatCollector.translateToLocal("tooltip.erebus.poweredGlider"));
+			list.add(StatCollector.translateToLocal("tooltip.erebus.gliderPoweredKey") + ": " + Keyboard.getKeyName(KeyBindingHandler.poweredGlide.getKeyCode()));
+		}
+		list.add(StatCollector.translateToLocal("tooltip.erebus.gliderGlideKey") + ": " + Keyboard.getKeyName(KeyBindingHandler.glide.getKeyCode()));
+	}
+
+	@Override
+	public boolean hasColor(ItemStack stack) {
+		return !stack.hasTagCompound() ? false : !stack.getTagCompound().hasKey("display", Constants.NBT.TAG_COMPOUND) ? false : stack.getTagCompound().getCompoundTag("display").hasKey("color", Constants.NBT.TAG_INT);
+	}
+
+	@Override
+	public int getColor(ItemStack stack) {
+		NBTTagCompound nbt = stack.getTagCompound();
+
+		if (nbt == null)
+			return 0xFFFFFF;
+		else {
+			NBTTagCompound displayNBT = nbt.getCompoundTag("display");
+			return displayNBT == null ? 0xFFFFFF : displayNBT.hasKey("color", 3) ? displayNBT.getInteger("color") : 0xFFFFFF;
+		}
+	}
+
+	@Override
+	public void removeColor(ItemStack stack) {
+		NBTTagCompound nbt = stack.getTagCompound();
+
+		if (nbt != null) {
+			NBTTagCompound displayNBT = nbt.getCompoundTag("display");
+
+			if (displayNBT.hasKey("color"))
+				displayNBT.removeTag("color");
+		}
+	}
+
+	@Override
+	public void func_82813_b(ItemStack stack, int colour) {
+		NBTTagCompound nbt = stack.getTagCompound();
+
+		if (nbt == null) {
+			nbt = new NBTTagCompound();
+			stack.setTagCompound(nbt);
+		}
+
+		NBTTagCompound displayNBT = nbt.getCompoundTag("display");
+
+		if (!nbt.hasKey("display", 10))
+			nbt.setTag("display", displayNBT);
+
+		displayNBT.setInteger("color", colour);
+	}
+
 	@Override
 	public boolean getIsRepairable(ItemStack armour, ItemStack material) {
-		return material.getItem() == ModItems.materials && material.getItemDamage() == DATA.gliderWing.ordinal();
+		return material.getItem() == ModItems.materials && material.getItemDamage() == DATA.GLIDER_WING.ordinal();
 	}
 
 	@Override
@@ -49,37 +111,39 @@ public class ItemArmorGlider extends ItemArmor {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public ModelBiped getArmorModel(EntityLivingBase player, ItemStack is, int slot) {
-		ModelArmorGlider model = new ModelArmorGlider();
-		ModelArmorPowered modelPower = new ModelArmorPowered();
-		model.bipedHead.showModel = false;
-		model.bipedHeadwear.showModel = false;
-		model.bipedBody.showModel = false;
-		model.bipedRightArm.showModel = false;
-		model.bipedLeftArm.showModel = false;
-		model.bipedRightLeg.showModel = false;
-		model.bipedLeftLeg.showModel = false;
+	public ModelBiped getArmorModel(EntityLivingBase player, ItemStack stack, int slot) {
+		if (canFly()) {
+			ModelArmorPowered model = new ModelArmorPowered();
+			model.bipedHead.showModel = false;
+			model.bipedHeadwear.showModel = false;
+			model.bipedBody.showModel = false;
+			model.bipedRightArm.showModel = false;
+			model.bipedLeftArm.showModel = false;
+			model.bipedRightLeg.showModel = false;
+			model.bipedLeftLeg.showModel = false;
 
-		modelPower.bipedHead.showModel = false;
-		modelPower.bipedHeadwear.showModel = false;
-		modelPower.bipedBody.showModel = false;
-		modelPower.bipedRightArm.showModel = false;
-		modelPower.bipedLeftArm.showModel = false;
-		modelPower.bipedRightLeg.showModel = false;
-		modelPower.bipedLeftLeg.showModel = false;
+			if (stack.hasTagCompound()) {
+				model.isGliding = stack.getTagCompound().getBoolean("isGliding");
+				model.isPowered = stack.getTagCompound().getBoolean("isPowered");
+			}
 
-		if (is.hasTagCompound()) {
-			model.isGliding = is.getTagCompound().getBoolean("isGliding");
-			modelPower.isGliding = is.getTagCompound().getBoolean("isGliding");
+			return model;
+		} else {
+			ModelArmorGlider model = new ModelArmorGlider();
+
+			model.bipedHead.showModel = false;
+			model.bipedHeadwear.showModel = false;
+			model.bipedBody.showModel = false;
+			model.bipedRightArm.showModel = false;
+			model.bipedLeftArm.showModel = false;
+			model.bipedRightLeg.showModel = false;
+			model.bipedLeftLeg.showModel = false;
+
+			if (stack.hasTagCompound())
+				model.isGliding = stack.getTagCompound().getBoolean("isGliding");
+
+			return model;
 		}
-
-		if (is.hasTagCompound())
-			modelPower.isPowered = is.getTagCompound().getBoolean("isPowered");
-
-		if (canFly())
-			return modelPower;
-
-		return model;
 	}
 
 	@Override
@@ -88,13 +152,13 @@ public class ItemArmorGlider extends ItemArmor {
 			if (!stack.hasTagCompound())
 				stack.stackTagCompound = new NBTTagCompound();
 
-			if (stack.getTagCompound().getBoolean("isGliding") && !KeyBindingHandler.glide.getIsKeyPressed()) {
+			if (stack.getTagCompound().getBoolean("isGliding") && (!KeyBindingHandler.glide.getIsKeyPressed() || entity.onGround)) {
 				stack.getTagCompound().setBoolean("isGliding", false);
 				PacketPipeline.sendToServer(new PacketGlider(false));
 			}
 
-			if (this == ModItems.armorGliderPowered)
-				if (stack.getTagCompound().getBoolean("isPowered") && !KeyBindingHandler.poweredGlide.getIsKeyPressed()) {
+			if (canFly())
+				if (stack.getTagCompound().getBoolean("isPowered") && (!KeyBindingHandler.poweredGlide.getIsKeyPressed() || entity.onGround)) {
 					stack.getTagCompound().setBoolean("isPowered", false);
 					PacketPipeline.sendToServer(new PacketGliderPowered(false));
 				}
@@ -141,87 +205,58 @@ public class ItemArmorGlider extends ItemArmor {
 	}
 
 	@Override
-	public void onCreated(ItemStack is, World world, EntityPlayer player) {
-		if (!is.hasTagCompound())
-			is.setTagCompound(new NBTTagCompound());
-		is.stackTagCompound.setBoolean("isGliding", false);
-		is.stackTagCompound.setBoolean("isPowered", false);
-		is.stackTagCompound.setInteger("fuelTicks", 0);
+	public void onCreated(ItemStack stack, World world, EntityPlayer player) {
+		if (!stack.hasTagCompound())
+			stack.setTagCompound(new NBTTagCompound());
+		stack.stackTagCompound.setBoolean("isGliding", false);
+		stack.stackTagCompound.setBoolean("isPowered", false);
+		stack.stackTagCompound.setInteger("fuelTicks", 0);
 
 	}
 
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
-	public void onPlayerRenderPre(RenderPlayerEvent.Pre e) {
+	public void onPlayerRenderPre(RenderPlayerEvent.Pre event) {
 		GL11.glPushMatrix();
-		EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
+
+		EntityPlayer player = event.entityPlayer;
+
+		double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.partialRenderTick;
+		double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.partialRenderTick;
+		double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.partialRenderTick;
+		d0 = d0 - RenderManager.renderPosX;
+		d1 = d1 - RenderManager.renderPosY;
+		d2 = d2 - RenderManager.renderPosZ;
+		GL11.glTranslated(d0, d1, d2);
+
 		ItemStack chestPlate = player.inventory.armorInventory[2];
-		if (chestPlate != null && chestPlate.getItem() == ModItems.armorGlider || chestPlate != null && chestPlate.getItem() == ModItems.armorGliderPowered) {
-			if (!chestPlate.hasTagCompound()) {
-				chestPlate.stackTagCompound = new NBTTagCompound();
-				return;
-			}
+		if (chestPlate != null && chestPlate.getItem() instanceof ItemArmorGlider && chestPlate.hasTagCompound())
 			if (chestPlate.getTagCompound().getBoolean("isGliding") && !player.onGround || chestPlate.getTagCompound().getBoolean("isPowered") && !player.onGround) {
-				// Method is fixed but rotations need working out!
-				int yaw = (int) player.rotationYaw;
-
-				yaw += 22;
-				yaw %= 360;
-
-				if (yaw < 0)
-					yaw += 360;
-
-				int facing = yaw / 45; // 360degrees divided by 45 == 8 zones
-				float x = 0;
-				float y = 0;
-
-				switch (facing) {
-					case 0:
-						x = 1;
-						y = 0;
-						break;
-					case 1:
-						x = 1;
-						y = 1;
-						break;
-					case 2:
-						x = 0;
-						y = 1;
-						break;
-					case 3:
-						x = -1;
-						y = 1;
-						break;
-					case 4:
-						x = -1;
-						y = 0;
-						break;
-					case 5:
-						x = -1;
-						y = -1;
-						break;
-					case 6:
-						x = 0;
-						y = -1;
-						break;
-					case 7:
-						x = 1;
-						y = -1;
-						break;
-				}
+				float yaw = player.rotationYaw;
+				float x = (float) Math.cos(Math.PI * yaw / 180F);
+				float y = (float) Math.sin(Math.PI * yaw / 180F);
 				GL11.glRotatef(60.0F, x, 0.0F, y);
-				player.limbSwingAmount = 0.001F;
+				player.limbSwingAmount = 0.1F;
 			}
-		}
+
+		GL11.glTranslated(-d0, -d1, -d2);
 	}
 
 	public boolean canFly() {
 		return this == ModItems.armorGliderPowered;
 	}
 
+	private boolean hasTag(ItemStack stack) {
+		if (!stack.hasTagCompound()) {
+			stack.setTagCompound(new NBTTagCompound());
+			return false;
+		}
+		return true;
+	}
+
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
-	public void onPlayerRenderPost(RenderPlayerEvent.Post e) {
+	public void onPlayerRenderPost(RenderPlayerEvent.Post event) {
 		GL11.glPopMatrix();
 	}
 }

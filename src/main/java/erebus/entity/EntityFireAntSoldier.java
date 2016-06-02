@@ -11,6 +11,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import erebus.core.handler.configs.ConfigHandler;
 
 public class EntityFireAntSoldier extends EntityMob {
 	private int shouldDo;
@@ -26,8 +27,8 @@ public class EntityFireAntSoldier extends EntityMob {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.8D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 20D : 20D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 4D : 4D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 	}
 
@@ -58,9 +59,9 @@ public class EntityFireAntSoldier extends EntityMob {
 
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int looting) {
-		entityDropItem(new ItemStack(Items.magma_cream, rand.nextInt(1) + 1 + looting, 0), 0.0F);
+		entityDropItem(new ItemStack(Items.blaze_powder, rand.nextInt(1) + 1 + looting, 0), 0.0F);
 		if (rand.nextInt(5) == 0)
-			entityDropItem(new ItemStack(Items.blaze_powder, rand.nextInt(1) + 1 + looting, 0), 0.0F);
+			entityDropItem(new ItemStack(Items.blaze_rod, rand.nextInt(1) + 1 + looting, 0), 0.0F);
 	}
 
 	public boolean isClimbing() {

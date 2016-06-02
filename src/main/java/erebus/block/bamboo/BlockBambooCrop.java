@@ -3,6 +3,12 @@ package erebus.block.bamboo;
 import java.util.ArrayList;
 import java.util.Random;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import erebus.ModItems;
+import erebus.ModTabs;
+import erebus.core.proxy.ClientProxy.BlockRenderIDs;
+import erebus.item.ItemMaterials.DATA;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -12,12 +18,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import erebus.ModItems;
-import erebus.ModTabs;
-import erebus.core.proxy.ClientProxy.BlockRenderIDs;
-import erebus.item.ItemMaterials.DATA;
 
 public class BlockBambooCrop extends Block {
 
@@ -38,7 +38,7 @@ public class BlockBambooCrop extends Block {
 
 	@Override
 	public int damageDropped(int meta) {
-		return DATA.bamboo.ordinal();
+		return DATA.BAMBOO.ordinal();
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class BlockBambooCrop extends Block {
 	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
 		if (metadata == 0 && world.rand.nextInt(metadata >= 8 ? 35 : 20) == 0) {
 			ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
-			ret.add(new ItemStack(ModItems.materials, 1, DATA.bambooShoot.ordinal()));
+			ret.add(new ItemStack(ModItems.materials, 1, DATA.BAMBOO_SHOOT.ordinal()));
 			return ret;
 		}
 		return super.getDrops(world, x, y, z, metadata, fortune);

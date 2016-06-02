@@ -10,12 +10,14 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.item.ItemMaterials;
 
 public class EntityScorpion extends EntityMob {
 	private boolean sting;
 	private boolean poisoned;
 	public static float stingticks;
+	private int cooldown = 0;
 
 	public EntityScorpion(World world) {
 		super(world);
@@ -33,18 +35,26 @@ public class EntityScorpion extends EntityMob {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(1.0D); // Movespeed
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(30.0D); // MaxHealth
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(3.0D); // atkDmg
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 30D : 30D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 3D : 3D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D); // followRange
 	}
 
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (!worldObj.isRemote && !captured())
+		if (!worldObj.isRemote && !captured()) {
 			setisStinging(false);
-		if (!worldObj.isRemote && captured())
+			if(cooldown > 0 )
+				cooldown = 0;
+		}
+		if (!worldObj.isRemote && captured()) {
 			updateRiderPosition();
+			if(cooldown < 10)
+				cooldown++;
+			if(cooldown >= 10)
+				cooldown = 0;
+		}
 		if (sting && stingticks < 0.64F) {
 			stingticks = stingticks + 0.16F;
 			if (stingticks >= 0.64F) {
@@ -92,8 +102,8 @@ public class EntityScorpion extends EntityMob {
 		for (amount = 0; amount < chance; ++amount) {
 			int pincerChance = rand.nextInt(30);
 			if (pincerChance == 0)
-				entityDropItem(ItemMaterials.DATA.scorpionPincer.createStack(), 0.0F);
-			entityDropItem(ItemMaterials.DATA.poisonGland.createStack(1 + rand.nextInt(2)), 0.0F);
+				entityDropItem(ItemMaterials.DATA.SCORPION_PINCER.makeStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.POISON_GLAND.makeStack(1 + rand.nextInt(2)), 0.0F);
 		}
 	}
 
@@ -116,12 +126,12 @@ public class EntityScorpion extends EntityMob {
 		return riddenByEntity != null;
 	}
 
-	private void setisStinging(boolean par1) {
-		sting = par1;
+	private void setisStinging(boolean state) {
+		sting = state;
 	}
 
-	private void setHasBeenStung(boolean par1) {
-		poisoned = par1;
+	private void setHasBeenStung(boolean state) {
+		poisoned = state;
 	}
 
 	@Override
@@ -129,19 +139,20 @@ public class EntityScorpion extends EntityMob {
 		super.onCollideWithPlayer(player);
 		if (player.isSneaking())
 			player.setSneaking(false);
-		byte var2 = 0;
+		byte duration = 0;
 		if (!worldObj.isRemote && player.boundingBox.maxY >= boundingBox.minY && player.boundingBox.minY <= boundingBox.maxY && captured())
 			if (worldObj.difficultySetting.ordinal() > 1)
 				if (worldObj.difficultySetting == EnumDifficulty.NORMAL)
-					var2 = 7;
+					duration = 7;
 				else if (worldObj.difficultySetting == EnumDifficulty.HARD)
-					var2 = 15;
-		if (var2 > 0 && rand.nextInt(200) == 0) {
-			player.addPotionEffect(new PotionEffect(Potion.poison.id, var2 * 10, 0));
+					duration = 15;
+		if (duration > 0 && rand.nextInt(200) == 0) {
+			player.addPotionEffect(new PotionEffect(Potion.poison.id, duration * 10, 0));
 			setisStinging(true);
 		}
 		if (!player.capabilities.isCreativeMode && !worldObj.isRemote && !captured())
-			player.mountEntity(this);
+			if(getEntitySenses().canSee(player))
+				player.mountEntity(this);
 	}
 
 	@Override
@@ -154,9 +165,9 @@ public class EntityScorpion extends EntityMob {
 	}
 
 	@Override
-	protected void attackEntity(Entity entity, float par2) {
-		super.attackEntity(entity, par2);
-		if (par2 < 1.0F && entity.boundingBox.maxY > boundingBox.minY && entity.boundingBox.minY < boundingBox.maxY)
+	protected void attackEntity(Entity entity, float distance) {
+		super.attackEntity(entity, distance);
+		if (distance < 1.0F && entity.boundingBox.maxY > boundingBox.minY && entity.boundingBox.minY < boundingBox.maxY && cooldown == 0)
 			attackEntityAsMob(entity);
 	}
 }

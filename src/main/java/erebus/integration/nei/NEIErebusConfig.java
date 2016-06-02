@@ -1,17 +1,17 @@
 package erebus.integration.nei;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.OreDictionary;
 import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
 import codechicken.nei.recipe.DefaultOverlayHandler;
 import erebus.ModBlocks;
 import erebus.block.BlockDoorErebus;
 import erebus.client.gui.GuiPetrifiedWorkbench;
-import erebus.core.handler.configs.ConfigHandler;
 import erebus.item.ItemMaterials;
 import erebus.lib.Reference;
+import erebus.world.biomes.decorators.data.OreSettings.OreType;
+import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 public class NEIErebusConfig implements IConfigureNEI {
 
@@ -23,9 +23,6 @@ public class NEIErebusConfig implements IConfigureNEI {
 		API.registerRecipeHandler(new OfferingAltarNEIHandler());
 		API.registerUsageHandler(new OfferingAltarNEIHandler());
 
-		API.registerRecipeHandler(new CraftingAltarNEIHandler());
-		API.registerUsageHandler(new CraftingAltarNEIHandler());
-
 		API.registerRecipeHandler(new SmoothieMakerNEIHandler());
 		API.registerUsageHandler(new SmoothieMakerNEIHandler());
 
@@ -34,26 +31,35 @@ public class NEIErebusConfig implements IConfigureNEI {
 		API.hideItem(new ItemStack(ModBlocks.insectRepellent));
 		API.hideItem(new ItemStack(ModBlocks.flowerPlanted, 1, OreDictionary.WILDCARD_VALUE));
 		API.hideItem(new ItemStack(ModBlocks.honeyBlock));
+		API.hideItem(new ItemStack(ModBlocks.bambooShoot));
+		API.hideItem(new ItemStack(ModBlocks.slidingBlockPuzzle));
+		API.hideItem(new ItemStack(ModBlocks.completedPuzzle));
+		API.hideItem(new ItemStack(ModBlocks.anthillBlock));
+		API.hideItem(new ItemStack(ModBlocks.anthillStairs));
+		API.hideItem(new ItemStack(ModBlocks.soldierAntTrap));
+		API.hideItem(new ItemStack(ModBlocks.puffShroom));
+		API.hideItem(new ItemStack(ModBlocks.forceLock));
+		API.hideItem(ItemMaterials.DATA.FORCE_KEY.makeStack());
 
-		if (!ConfigHandler.INSTANCE.aluminium) {
+		if (!OreType.ALUMINIUM.isEnabled()) {
 			API.hideItem(new ItemStack(ModBlocks.oreAluminium));
-			API.hideItem(ItemMaterials.DATA.ingotAluminium.createStack());
+			API.hideItem(ItemMaterials.DATA.INGOT_ALUMINIUM.makeStack());
 		}
-		if (!ConfigHandler.INSTANCE.copper) {
+		if (!OreType.COPPER.isEnabled()) {
 			API.hideItem(new ItemStack(ModBlocks.oreCopper));
-			API.hideItem(ItemMaterials.DATA.ingotCopper.createStack());
+			API.hideItem(ItemMaterials.DATA.INGOT_COPPER.makeStack());
 		}
-		if (!ConfigHandler.INSTANCE.lead) {
+		if (!OreType.LEAD.isEnabled()) {
 			API.hideItem(new ItemStack(ModBlocks.oreLead));
-			API.hideItem(ItemMaterials.DATA.ingotLead.createStack());
+			API.hideItem(ItemMaterials.DATA.INGOT_LEAD.makeStack());
 		}
-		if (!ConfigHandler.INSTANCE.silver) {
+		if (!OreType.SILVER.isEnabled()) {
 			API.hideItem(new ItemStack(ModBlocks.oreSilver));
-			API.hideItem(ItemMaterials.DATA.ingotSilver.createStack());
+			API.hideItem(ItemMaterials.DATA.INGOT_SILVER.makeStack());
 		}
-		if (!ConfigHandler.INSTANCE.tin) {
+		if (!OreType.TIN.isEnabled()) {
 			API.hideItem(new ItemStack(ModBlocks.oreTin));
-			API.hideItem(ItemMaterials.DATA.ingotTin.createStack());
+			API.hideItem(ItemMaterials.DATA.INGOT_TIN.makeStack());
 		}
 
 		API.hideItem(new ItemStack(ModBlocks.hanger));

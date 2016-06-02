@@ -3,6 +3,13 @@ package erebus.block;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import erebus.ModBlocks.IHasCustomItemBlock;
+import erebus.ModItems;
+import erebus.ModTabs;
+import erebus.item.ItemMaterials.DATA;
+import erebus.item.block.ItemBlockGeneric;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -15,15 +22,8 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import erebus.ModBlocks.ISubBlocksBlock;
-import erebus.ModItems;
-import erebus.ModTabs;
-import erebus.item.ItemMaterials.DATA;
-import erebus.item.block.ItemBlockGeneric;
 
-public class BlockRedGem extends Block implements ISubBlocksBlock {
+public class BlockRedGem extends Block implements IHasCustomItemBlock {
 
 	public static final String[] iconPaths = new String[] { "redgem", "redlampOn", "redlampOff" };
 	@SideOnly(Side.CLIENT)
@@ -64,7 +64,7 @@ public class BlockRedGem extends Block implements ISubBlocksBlock {
 
 	@Override
 	public int damageDropped(int meta) {
-		return meta == 1 || meta == 2 ? 1 : DATA.redGem.ordinal();
+		return meta == 1 || meta == 2 ? 1 : DATA.RED_GEM.ordinal();
 	}
 
 	@Override

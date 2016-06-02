@@ -1,21 +1,23 @@
 package erebus.item;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 import erebus.ModBlocks;
 import erebus.ModTabs;
 import erebus.network.PacketPipeline;
 import erebus.network.client.PacketParticle;
 import erebus.network.client.PacketParticle.ParticleType;
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
 
 public class ItemSprayCan extends Item {
 
 	public ItemSprayCan() {
 		setMaxStackSize(9);
 		setCreativeTab(ModTabs.specials);
+		setTextureName("erebus:spray_can");
+		setUnlocalizedName("erebus.sprayCan");
 	}
 
 	protected String getSprayCanSound() {

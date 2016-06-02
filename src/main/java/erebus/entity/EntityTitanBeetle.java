@@ -2,14 +2,12 @@ package erebus.entity;
 
 import java.util.Random;
 
-import erebus.item.ItemFood;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIMate;
@@ -35,7 +33,10 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import erebus.Erebus;
 import erebus.ModItems;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.core.helper.Utils;
+import erebus.entity.ai.EntityErebusAIAttackOnCollide;
+import erebus.item.ItemErebusFood;
 import erebus.item.ItemMaterials;
 import erebus.tileentity.TileEntityTitanChest;
 
@@ -53,7 +54,7 @@ public class EntityTitanBeetle extends EntityTameable {
 		stepHeight = 2.0F;
 		setSize(2.5F, 1.2F);
 		tasks.addTask(0, new EntityAISwimming(this));
-		tasks.addTask(1, new EntityAIAttackOnCollide(this, 0.5D, true));
+		tasks.addTask(1, new EntityErebusAIAttackOnCollide(this, 0.5D, true));
 		tasks.addTask(2, new EntityAIMate(this, 0.5D));
 		tasks.addTask(3, new EntityAITempt(this, 0.5D, ModItems.turnip, false));
 		tasks.addTask(5, new EntityAIWander(this, 0.5D));
@@ -132,7 +133,7 @@ public class EntityTitanBeetle extends EntityTameable {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(1.0D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(60.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 60D : 60D * ConfigHandler.INSTANCE.mobHealthMultipier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(0.75D);
 	}
@@ -191,12 +192,12 @@ public class EntityTitanBeetle extends EntityTameable {
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int looting) {
 		if (getTameState() >= 2)
-			entityDropItem(ItemMaterials.DATA.rhinoRidingKit.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.RHINO_RIDING_KIT.makeStack(), 0.0F);
 		int var3 = 1 + rand.nextInt(3) + rand.nextInt(1 + looting);
 		for (int a = 0; a < var3; ++a)
-			entityDropItem(ItemMaterials.DATA.plateExo.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.PLATE_EXO.makeStack(), 0.0F);
 
-		entityDropItem(new ItemStack(ModItems.food, 1 + rand.nextInt(1), isBurning() ? ItemFood.FoodType.titanChopCooked.ordinal() : ItemFood.FoodType.titanChop.ordinal()), 0.0F);
+		entityDropItem(new ItemStack(ModItems.food, 1 + rand.nextInt(1), isBurning() ? ItemErebusFood.FoodType.TITAN_CHOP_COOKED.ordinal() : ItemErebusFood.FoodType.TITAN_CHOP_RAW.ordinal()), 0.0F);
 		dropChests();
 	}
 
@@ -233,8 +234,8 @@ public class EntityTitanBeetle extends EntityTameable {
 			openGUI(player);
 			return true;
 		}
-		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.beetleTamingAmulet.ordinal() && getTameState() == 0) {
-			healingBuff = 20F;
+		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.BEETLE_TAMING_AMULET.ordinal() && getTameState() == 0) {
+			healingBuff = (float) (ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 20D : 20D * ConfigHandler.INSTANCE.mobHealthMultipier);
 			is.stackSize--;
 			setTameState((byte) 1);
 			playTameEffect(true);
@@ -245,7 +246,7 @@ public class EntityTitanBeetle extends EntityTameable {
 			heal(healingBuff);
 			return true;
 		}
-		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.rhinoRidingKit.ordinal() && getTameState() == 1) {
+		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.RHINO_RIDING_KIT.ordinal() && getTameState() == 1) {
 			is.stackSize--;
 			player.swingItem();
 			setTameState((byte) 2);
@@ -254,6 +255,7 @@ public class EntityTitanBeetle extends EntityTameable {
 		if (is != null && is.getItem() == ModItems.turnip && !shagging() && getTameState() != 0) {
 			is.stackSize--;
 			shagCount = 600;
+			worldObj.playSoundEffect(posX, posY, posZ, "erebus:beetlelarvamunch", 1.0F, 0.75F);
 			return true;
 		}
 		if (is == null && getTameState() >= 2) {
@@ -261,8 +263,8 @@ public class EntityTitanBeetle extends EntityTameable {
 				player.mountEntity(this);
 			return true;
 		}
-		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.bambooShoot.ordinal() && getTameState() != 0) {
-			healingBuff = 5.0F;
+		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.BAMBOO_SHOOT.ordinal() && getTameState() != 0) {
+			healingBuff = (float) (ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 5D : 5D * ConfigHandler.INSTANCE.mobHealthMultipier);
 			if (getHealth() < getMaxHealth()) {
 				heal(healingBuff);
 				playTameEffect(true);
@@ -397,7 +399,7 @@ public class EntityTitanBeetle extends EntityTameable {
 				return false;
 			}
 		if (entity != null && getDistanceToEntity(entity) <= 2.5F && entity.boundingBox.maxY > boundingBox.minY && entity.boundingBox.minY < boundingBox.maxY)
-			entity.attackEntityFrom(DamageSource.causeMobDamage(this), 4);
+			entity.attackEntityFrom(DamageSource.causeMobDamage(this), (float) (ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 4D : 4D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier));
 		return super.attackEntityAsMob(entity);
 	}
 

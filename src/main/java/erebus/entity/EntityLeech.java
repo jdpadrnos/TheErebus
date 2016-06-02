@@ -9,6 +9,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import erebus.ModItems;
 import erebus.client.render.entity.AnimationMathHelper;
+import erebus.core.handler.configs.ConfigHandler;
 
 public class EntityLeech extends EntityMob {
 
@@ -40,8 +41,8 @@ public class EntityLeech extends EntityMob {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.6D); // Movespeed
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D); // MaxHealth
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 10D : 10D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 1D : 1D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D); // followRange
 	}
 
@@ -135,9 +136,11 @@ public class EntityLeech extends EntityMob {
 	}
 
 	@Override
-	protected void dropFewItems(boolean hit, int amount) {
-		int count = 1 + getBloodConsumed();
-		dropItem(ModItems.lifeBlood, count);
+	protected void dropFewItems(boolean recentlyHit, int amount) {
+		if (recentlyHit) {
+			int count = 1 + getBloodConsumed();
+			dropItem(ModItems.lifeBlood, count);
+		}
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import erebus.client.render.entity.AnimationMathHelper;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.item.ItemMaterials;
 
 public class EntityFly extends EntityAmbientCreature {
@@ -35,7 +36,7 @@ public class EntityFly extends EntityAmbientCreature {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(4.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 4D : 4D * ConfigHandler.INSTANCE.mobHealthMultipier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
 	}
 
@@ -220,8 +221,8 @@ public class EntityFly extends EntityAmbientCreature {
 	@Override
 	protected void dropFewItems(boolean par1, int par2) {
 		if (rand.nextInt(10) == 0)
-			entityDropItem(ItemMaterials.DATA.flyWing.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.FLY_WING.makeStack(), 0.0F);
 		if (rand.nextInt(20) == 0)
-			entityDropItem(ItemMaterials.DATA.compoundEyes.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.COMPOUND_EYES.makeStack(), 0.0F);
 	}
 }

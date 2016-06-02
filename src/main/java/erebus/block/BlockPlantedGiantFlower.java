@@ -4,6 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import erebus.ModBlocks;
+import erebus.ModBlocks.IHasCustomItemBlock;
+import erebus.ModItems;
+import erebus.core.proxy.ClientProxy.BlockRenderIDs;
+import erebus.item.block.ItemBlockFlowerPlanted;
+import erebus.world.feature.plant.WorldGenGiantFlowers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -15,16 +23,8 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.common.util.ForgeDirection;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import erebus.ModBlocks;
-import erebus.ModBlocks.ISubBlocksBlock;
-import erebus.ModItems;
-import erebus.core.proxy.ClientProxy.BlockRenderIDs;
-import erebus.item.block.ItemBlockFlowerPlanted;
-import erebus.world.feature.plant.WorldGenGiantFlowers;
 
-public class BlockPlantedGiantFlower extends BlockSapling implements ISubBlocksBlock {
+public class BlockPlantedGiantFlower extends BlockSapling implements IHasCustomItemBlock {
 
 	public enum FLOWER_TYPE {
 		BLACK,

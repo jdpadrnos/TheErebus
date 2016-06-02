@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import erebus.ModBlocks;
+import erebus.ModItems;
+import erebus.core.helper.Utils;
+import erebus.item.ItemMaterials;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
@@ -13,9 +17,6 @@ import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
-import erebus.ModBlocks;
-import erebus.ModItems;
-import erebus.core.helper.Utils;
 
 public class ComposterRegistry {
 
@@ -33,8 +34,20 @@ public class ComposterRegistry {
 		register(Items.wooden_sword);
 		register(Items.wheat);
 		register(Items.poisonous_potato);
+		register(ItemMaterials.DATA.DARK_FRUIT_SEEDS.makeStack());
+		register(ItemMaterials.DATA.WEEPING_BLUE_PETAL.makeStack());
+		register(ItemMaterials.DATA.PAPYRUS.makeStack());
+		register(ItemMaterials.DATA.NETTLE_LEAVES.makeStack());
+		register(ItemMaterials.DATA.NETTLE_FLOWERS.makeStack());
+		register(ItemMaterials.DATA.MOSS_BALL.makeStack());
+		register(ItemMaterials.DATA.YELLOW_DOTTED_FUNGUS.makeStack());
+		register(ItemMaterials.DATA.JADE_BERRIES.makeStack());
+		register(ItemMaterials.DATA.SNAPPER_ROOT.makeStack());
+		register(ItemMaterials.DATA.BAMBOO.makeStack());
+		register(ItemMaterials.DATA.BAMBOO_SHOOT.makeStack());
 
-		blacklist.add(new ItemStack(ModBlocks.wallPlants, 1, OreDictionary.WILDCARD_VALUE));
+		blacklist.add(new ItemStack(ModBlocks.wallPlants, 1, 1));
+		blacklist.add(new ItemStack(ModBlocks.wallPlantsCultivated, 1, 1));
 	}
 
 	private static void register(Item item) {

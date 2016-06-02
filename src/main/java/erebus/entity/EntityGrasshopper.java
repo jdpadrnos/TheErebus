@@ -12,6 +12,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import erebus.ModItems;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.entity.ai.EntityAIEatCrops;
 
 public class EntityGrasshopper extends EntityCreature {
@@ -22,7 +23,6 @@ public class EntityGrasshopper extends EntityCreature {
 	public EntityGrasshopper(World world) {
 		super(world);
 		stepHeight = 1.0F;
-		jumpMovementFactor = 0.1F;
 		setSize(1.3F, 0.5F);
 		getNavigator().setAvoidsWater(true);
 		tasks.addTask(0, new EntityAISwimming(this));
@@ -40,7 +40,7 @@ public class EntityGrasshopper extends EntityCreature {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.6D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(25.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 25D : 25D * ConfigHandler.INSTANCE.mobHealthMultipier);
 	}
 
 	@Override
@@ -105,7 +105,6 @@ public class EntityGrasshopper extends EntityCreature {
 		float direction = (float) (Math.atan2(motionZ, motionX) * 180.0D / Math.PI) - 90.0F;
 		float rotation = MathHelper.wrapAngleTo180_float(direction - rotationYaw);
 		rotationYaw += rotation;
-		setPositionAndUpdate(posX, posY, posZ);
 	}
 
 	public void setIsEating(boolean isEating) {

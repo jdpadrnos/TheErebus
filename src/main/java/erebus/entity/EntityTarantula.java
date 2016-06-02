@@ -10,16 +10,16 @@ import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import erebus.ModItems;
-import erebus.item.ItemMaterials;
+import erebus.core.handler.configs.ConfigHandler;
 
 public class EntityTarantula extends EntityMob {
-	public int skin = rand.nextInt(99);
 
 	public EntityTarantula(World world) {
 		super(world);
@@ -30,14 +30,15 @@ public class EntityTarantula extends EntityMob {
 	protected void entityInit() {
 		super.entityInit();
 		dataWatcher.addObject(16, new Byte((byte) 0));
+		dataWatcher.addObject(30, new Integer(rand.nextInt(2)));
 	}
 
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(30.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 30D : 30D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 5D : 5D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.7D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(5.0D);
 	}
 
 	@Override
@@ -172,7 +173,6 @@ public class EntityTarantula extends EntityMob {
 		else
 			entityDropItem(new ItemStack(ModItems.food, legDrop + looting, 4), 0.0F);
 		dropItem(Items.spider_eye, chanceFiftyFifty + looting);
-		entityDropItem(ItemMaterials.DATA.poisonGland.createStack(1 + rand.nextInt(2)), 0.0F);
 	}
 
 	@Override
@@ -198,5 +198,28 @@ public class EntityTarantula extends EntityMob {
 			}
 		}
 		return (IEntityLivingData) entityLivingData1;
+	}
+
+	public void setSkin(int skinType) {
+		dataWatcher.updateObject(30, new Integer(skinType));
+	}
+
+	@Override
+	public void writeEntityToNBT(NBTTagCompound nbt) {
+		super.writeEntityToNBT(nbt);
+		nbt.setInteger("skin", getSkin());
+	}
+
+	@Override
+	public void readEntityFromNBT(NBTTagCompound nbt) {
+		super.readEntityFromNBT(nbt);
+		if (nbt.hasKey("skin"))
+			setSkin(nbt.getInteger("skin"));
+		else
+			setSkin(rand.nextInt(2));
+	}
+
+	public int getSkin() {
+		return dataWatcher.getWatchableObjectInt(30);
 	}
 }

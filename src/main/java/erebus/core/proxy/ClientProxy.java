@@ -1,6 +1,10 @@
 package erebus.core.proxy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.particle.EntityBreakingFX;
 import net.minecraft.client.particle.EntityCloudFX;
 import net.minecraft.client.particle.EntityEnchantmentTableParticleFX;
@@ -12,8 +16,13 @@ import net.minecraft.client.particle.EntityLavaFX;
 import net.minecraft.client.particle.EntityPortalFX;
 import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.client.particle.EntitySpellParticleFX;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import cpw.mods.fml.client.registry.ClientRegistry;
@@ -21,26 +30,21 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import erebus.ModBlocks;
 import erebus.ModItems;
+import erebus.block.BlockPetrifiedChest;
+import erebus.block.silo.TileEntitySiloTank;
 import erebus.client.fx.EntityBubbleGasFX;
 import erebus.client.fx.EntityRepellentFX;
 import erebus.client.fx.EntitySonicFX;
+import erebus.client.gui.GuiAntInventory;
+import erebus.client.gui.GuiColossalCrate;
+import erebus.client.gui.GuiComposter;
+import erebus.client.gui.GuiErebusBasic;
+import erebus.client.gui.GuiPetrifiedChest;
+import erebus.client.gui.GuiPetrifiedWorkbench;
+import erebus.client.gui.GuiSmoothieMaker;
+import erebus.client.gui.GuiUmberFurnace;
 import erebus.client.model.entity.ModelAnimatedBlock;
 import erebus.client.model.entity.ModelAnimatedChest;
-import erebus.client.model.entity.ModelAntlion;
-import erebus.client.model.entity.ModelChameleonTick;
-import erebus.client.model.entity.ModelCicada;
-import erebus.client.model.entity.ModelFireAnt;
-import erebus.client.model.entity.ModelFireAntSoldier;
-import erebus.client.model.entity.ModelGlowWorm;
-import erebus.client.model.entity.ModelJumpingSpider;
-import erebus.client.model.entity.ModelLavaWebSpider;
-import erebus.client.model.entity.ModelPrayingMantis;
-import erebus.client.model.entity.ModelRhinoBeetle;
-import erebus.client.model.entity.ModelScytodes;
-import erebus.client.model.entity.ModelSporeling;
-import erebus.client.model.entity.ModelUmberGolem;
-import erebus.client.model.entity.ModelWheatWeevil;
-import erebus.client.model.entity.ModelWoodlouse;
 import erebus.client.render.block.BlockBambooCropRender;
 import erebus.client.render.block.BlockComposterRender;
 import erebus.client.render.block.BlockDoorRenderer;
@@ -48,7 +52,6 @@ import erebus.client.render.block.BlockDoublePlantRender;
 import erebus.client.render.block.BlockGlowshroomRender;
 import erebus.client.render.block.BlockGlowshroomStalkRender;
 import erebus.client.render.block.BlockHollowLogRender;
-import erebus.client.render.block.BlockKeystoneRenderer;
 import erebus.client.render.block.BlockPlantedFlowerRender;
 import erebus.client.render.block.BlockSiloRoofRender;
 import erebus.client.render.block.BlockSiloSupportsRender;
@@ -59,18 +62,22 @@ import erebus.client.render.entity.RenderAnimatedChest;
 import erebus.client.render.entity.RenderAntlion;
 import erebus.client.render.entity.RenderAntlionBoss;
 import erebus.client.render.entity.RenderAntlionMiniBoss;
+import erebus.client.render.entity.RenderBedBug;
 import erebus.client.render.entity.RenderBeetle;
 import erebus.client.render.entity.RenderBeetleLarva;
 import erebus.client.render.entity.RenderBlackAnt;
 import erebus.client.render.entity.RenderBlackWidow;
 import erebus.client.render.entity.RenderBloodSnail;
+import erebus.client.render.entity.RenderBombardierBeetle;
 import erebus.client.render.entity.RenderBotFly;
 import erebus.client.render.entity.RenderBotFlyLarva;
 import erebus.client.render.entity.RenderCentipede;
 import erebus.client.render.entity.RenderChameleonTick;
 import erebus.client.render.entity.RenderCicada;
+import erebus.client.render.entity.RenderCrushling;
 import erebus.client.render.entity.RenderCrushroom;
 import erebus.client.render.entity.RenderDragonfly;
+import erebus.client.render.entity.RenderEntityPreservedBlock;
 import erebus.client.render.entity.RenderEntityTarantulaEgg;
 import erebus.client.render.entity.RenderErebusLightningBolt;
 import erebus.client.render.entity.RenderExtractedBlock;
@@ -81,6 +88,7 @@ import erebus.client.render.entity.RenderGasVent;
 import erebus.client.render.entity.RenderGlowWorm;
 import erebus.client.render.entity.RenderGooBall;
 import erebus.client.render.entity.RenderGrasshopper;
+import erebus.client.render.entity.RenderHoneyPotAnt;
 import erebus.client.render.entity.RenderJumpingSpider;
 import erebus.client.render.entity.RenderLavaWebSpider;
 import erebus.client.render.entity.RenderLeech;
@@ -102,7 +110,8 @@ import erebus.client.render.entity.RenderSnapper;
 import erebus.client.render.entity.RenderSolifuge;
 import erebus.client.render.entity.RenderSolifugeSmall;
 import erebus.client.render.entity.RenderSporeBall;
-import erebus.client.render.entity.RenderSporeling;
+import erebus.client.render.entity.RenderSporeJet;
+import erebus.client.render.entity.RenderStagBeetle;
 import erebus.client.render.entity.RenderTarantula;
 import erebus.client.render.entity.RenderTarantulaBaby;
 import erebus.client.render.entity.RenderTarantulaMiniboss;
@@ -118,6 +127,8 @@ import erebus.client.render.entity.RenderWisp;
 import erebus.client.render.entity.RenderWoodlouse;
 import erebus.client.render.entity.RenderWorkerBee;
 import erebus.client.render.entity.RenderZombieAnt;
+import erebus.client.render.entity.RenderZombieAntSoldier;
+import erebus.client.render.item.ArmchairItemRenderer;
 import erebus.client.render.item.BambooBridgeItemRenderer;
 import erebus.client.render.item.BambooCrateItemRenderer;
 import erebus.client.render.item.BambooPoleItemRenderer;
@@ -126,7 +137,6 @@ import erebus.client.render.item.ExtenderThingyItemRenderer;
 import erebus.client.render.item.ItemAltarBaseRenderer;
 import erebus.client.render.item.ItemAntlionEggRenderer;
 import erebus.client.render.item.ItemBoneBlockRenderer;
-import erebus.client.render.item.ItemCraftingAltarRenderer;
 import erebus.client.render.item.ItemGlowingJarRenderer;
 import erebus.client.render.item.ItemOfferingAltarRenderer;
 import erebus.client.render.item.ItemPetrifiedWoodChestRenderer;
@@ -134,19 +144,23 @@ import erebus.client.render.item.ItemSmoothieMakerRenderer;
 import erebus.client.render.item.ItemTarantulaEggRenderer;
 import erebus.client.render.item.ItemUmberFurnaceRenderer;
 import erebus.client.render.item.ItemUmberGolemStatueRenderer;
+import erebus.client.render.item.ItemWandOfAnimationRenderer;
+import erebus.client.render.item.ItemWandOfPreservationRenderer;
 import erebus.client.render.item.PortalActivatorRenderer;
+import erebus.client.render.item.PreservedBlockitemRenderer;
+import erebus.client.render.item.RenderMaxSpeedBow;
 import erebus.client.render.item.ScorpionPincerItemRenderer;
-import erebus.client.render.item.WandOfAnimationItemRenderer;
 import erebus.client.render.item.WarHammerItemRenderer;
 import erebus.client.render.item.WaspDaggerItemRenderer;
 import erebus.client.render.item.WaspSwordItemRenderer;
 import erebus.client.render.item.WebSlingerItemRenderer;
 import erebus.client.render.item.WoodlouseBallItemRenderer;
 import erebus.client.render.tileentity.TileEntityAntlionEggRenderer;
+import erebus.client.render.tileentity.TileEntityArmchairRenderer;
 import erebus.client.render.tileentity.TileEntityBambooBridgeRenderer;
 import erebus.client.render.tileentity.TileEntityBambooPoleRenderer;
 import erebus.client.render.tileentity.TileEntityBoneBlockRenderer;
-import erebus.client.render.tileentity.TileEntityCraftingAltarRenderer;
+import erebus.client.render.tileentity.TileEntityCompletedPuzzleRenderer;
 import erebus.client.render.tileentity.TileEntityErebusAltarHealingRenderer;
 import erebus.client.render.tileentity.TileEntityErebusAltarLightningRenderer;
 import erebus.client.render.tileentity.TileEntityErebusAltarRenderer;
@@ -159,8 +173,12 @@ import erebus.client.render.tileentity.TileEntityGlowingJarRenderer;
 import erebus.client.render.tileentity.TileEntityLadderRenderer;
 import erebus.client.render.tileentity.TileEntityOfferingAltarRenderer;
 import erebus.client.render.tileentity.TileEntityPetrifiedWoodChestRenderer;
+import erebus.client.render.tileentity.TileEntityPreservedBlockRenderer;
+import erebus.client.render.tileentity.TileEntityPuffShroomRenderer;
 import erebus.client.render.tileentity.TileEntityRenderBambooCrate;
+import erebus.client.render.tileentity.TileEntitySlidingBlockPuzzleRenderer;
 import erebus.client.render.tileentity.TileEntitySmoothieMakerRenderer;
+import erebus.client.render.tileentity.TileEntitySoldierAntTrapRenderer;
 import erebus.client.render.tileentity.TileEntityTarantulaEggRenderer;
 import erebus.client.render.tileentity.TileEntityUmberGolemStatueRenderer;
 import erebus.core.handler.GogglesClientTickHandler;
@@ -171,16 +189,20 @@ import erebus.entity.EntityAnimatedChest;
 import erebus.entity.EntityAntlion;
 import erebus.entity.EntityAntlionBoss;
 import erebus.entity.EntityAntlionMiniBoss;
+import erebus.entity.EntityBedBug;
 import erebus.entity.EntityBeetle;
 import erebus.entity.EntityBeetleLarva;
 import erebus.entity.EntityBlackAnt;
 import erebus.entity.EntityBlackWidow;
 import erebus.entity.EntityBloodSnail;
+import erebus.entity.EntityBombardierBeetle;
+import erebus.entity.EntityBombardierBeetleLarva;
 import erebus.entity.EntityBotFly;
 import erebus.entity.EntityBotFlyLarva;
 import erebus.entity.EntityCentipede;
 import erebus.entity.EntityChameleonTick;
 import erebus.entity.EntityCicada;
+import erebus.entity.EntityCrushling;
 import erebus.entity.EntityCrushroom;
 import erebus.entity.EntityDragonfly;
 import erebus.entity.EntityExtractedBlock;
@@ -191,6 +213,7 @@ import erebus.entity.EntityGasVent;
 import erebus.entity.EntityGlowWorm;
 import erebus.entity.EntityGooBall;
 import erebus.entity.EntityGrasshopper;
+import erebus.entity.EntityHoneyPotAnt;
 import erebus.entity.EntityJumpingSpider;
 import erebus.entity.EntityLavaWebSpider;
 import erebus.entity.EntityLeech;
@@ -204,6 +227,7 @@ import erebus.entity.EntityMucusBombPrimed;
 import erebus.entity.EntityPoisonJet;
 import erebus.entity.EntityPondSkater;
 import erebus.entity.EntityPrayingMantis;
+import erebus.entity.EntityPreservedBlock;
 import erebus.entity.EntityPunchroom;
 import erebus.entity.EntityRhinoBeetle;
 import erebus.entity.EntityScorpion;
@@ -212,7 +236,8 @@ import erebus.entity.EntitySnapper;
 import erebus.entity.EntitySolifuge;
 import erebus.entity.EntitySolifugeSmall;
 import erebus.entity.EntitySporeBall;
-import erebus.entity.EntitySporeling;
+import erebus.entity.EntitySporeJet;
+import erebus.entity.EntityStagBeetle;
 import erebus.entity.EntityTarantula;
 import erebus.entity.EntityTarantulaBaby;
 import erebus.entity.EntityTarantulaEgg;
@@ -231,13 +256,21 @@ import erebus.entity.EntityWoodlouse;
 import erebus.entity.EntityWoodlouseBall;
 import erebus.entity.EntityWorkerBee;
 import erebus.entity.EntityZombieAnt;
+import erebus.entity.EntityZombieAntSoldier;
 import erebus.entity.effect.EntityErebusLightningBolt;
+import erebus.inventory.ContainerAnimatedBambooCrate;
+import erebus.inventory.ContainerBambooCrate;
+import erebus.inventory.ContainerExtenderThingy;
+import erebus.inventory.ContainerHoneyComb;
+import erebus.inventory.ContainerSilo;
 import erebus.tileentity.TileEntityAntlionEgg;
+import erebus.tileentity.TileEntityArmchair;
 import erebus.tileentity.TileEntityBambooBridge;
 import erebus.tileentity.TileEntityBambooCrate;
 import erebus.tileentity.TileEntityBambooPole;
 import erebus.tileentity.TileEntityBones;
-import erebus.tileentity.TileEntityCraftingAltar;
+import erebus.tileentity.TileEntityCompletedPuzzle;
+import erebus.tileentity.TileEntityComposter;
 import erebus.tileentity.TileEntityErebusAltar;
 import erebus.tileentity.TileEntityErebusAltarHealing;
 import erebus.tileentity.TileEntityErebusAltarLightning;
@@ -247,11 +280,17 @@ import erebus.tileentity.TileEntityExtenderThingy;
 import erebus.tileentity.TileEntityGaeanKeystone;
 import erebus.tileentity.TileEntityGlowGem;
 import erebus.tileentity.TileEntityGlowingJar;
+import erebus.tileentity.TileEntityHoneyComb;
 import erebus.tileentity.TileEntityLadder;
 import erebus.tileentity.TileEntityOfferingAltar;
 import erebus.tileentity.TileEntityPetrifiedWoodChest;
+import erebus.tileentity.TileEntityPreservedBlock;
+import erebus.tileentity.TileEntityPuffShroom;
+import erebus.tileentity.TileEntitySlidingBlockPuzzle;
 import erebus.tileentity.TileEntitySmoothieMaker;
+import erebus.tileentity.TileEntitySoldierAntTrap;
 import erebus.tileentity.TileEntityTarantulaEgg;
+import erebus.tileentity.TileEntityUmberFurnace;
 import erebus.tileentity.TileEntityUmberGolemStatue;
 
 public class ClientProxy extends CommonProxy {
@@ -265,7 +304,6 @@ public class ClientProxy extends CommonProxy {
 		SILO_ROOF,
 		SILO_SUPPORTS,
 		COMPOSTER,
-		KEYSTONE,
 		DOUBLE_PLANTS,
 		VELOCITY_BLOCK,
 		DOOR,
@@ -305,19 +343,19 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityLocust.class, new RenderLocust());
 		RenderingRegistry.registerEntityRenderingHandler(EntitySolifuge.class, new RenderSolifuge());
 		RenderingRegistry.registerEntityRenderingHandler(EntityMoth.class, new RenderMoth());
-		RenderingRegistry.registerEntityRenderingHandler(EntityAntlion.class, new RenderAntlion(new ModelAntlion(), 0.3F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityAntlion.class, new RenderAntlion());
 		RenderingRegistry.registerEntityRenderingHandler(EntityWaspDagger.class, new WaspDaggerItemRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityAnimatedBlock.class, new RenderAnimatedBlock(new ModelAnimatedBlock(), 0.3F));
 		RenderingRegistry.registerEntityRenderingHandler(EntityAnimatedChest.class, new RenderAnimatedChest(new ModelAnimatedChest(), 0.3F));
 		RenderingRegistry.registerEntityRenderingHandler(EntityAnimatedBambooCrate.class, new RenderAnimatedBlock(new ModelAnimatedBlock(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityGlowWorm.class, new RenderGlowWorm(new ModelGlowWorm(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityScytodes.class, new RenderScytodes(new ModelScytodes(), 0.5F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityMoneySpider.class, new RenderMoneySpider(new ModelScytodes(), 0.5F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityUmberGolem.class, new RenderUmberGolem(new ModelUmberGolem(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityPrayingMantis.class, new RenderPrayingMantis(new ModelPrayingMantis(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityJumpingSpider.class, new RenderJumpingSpider(new ModelJumpingSpider(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityFireAnt.class, new RenderFireAnt(new ModelFireAnt(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityRhinoBeetle.class, new RenderRhinoBeetle(new ModelRhinoBeetle(), 0.5F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityGlowWorm.class, new RenderGlowWorm());
+		RenderingRegistry.registerEntityRenderingHandler(EntityScytodes.class, new RenderScytodes());
+		RenderingRegistry.registerEntityRenderingHandler(EntityMoneySpider.class, new RenderMoneySpider());
+		RenderingRegistry.registerEntityRenderingHandler(EntityUmberGolem.class, new RenderUmberGolem());
+		RenderingRegistry.registerEntityRenderingHandler(EntityPrayingMantis.class, new RenderPrayingMantis());
+		RenderingRegistry.registerEntityRenderingHandler(EntityJumpingSpider.class, new RenderJumpingSpider());
+		RenderingRegistry.registerEntityRenderingHandler(EntityFireAnt.class, new RenderFireAnt());
+		RenderingRegistry.registerEntityRenderingHandler(EntityRhinoBeetle.class, new RenderRhinoBeetle());
 		RenderingRegistry.registerEntityRenderingHandler(EntityWebSling.class, new RenderWebSling());
 		RenderingRegistry.registerEntityRenderingHandler(EntityErebusLightningBolt.class, new RenderErebusLightningBolt());
 		RenderingRegistry.registerEntityRenderingHandler(EntityExtractedBlock.class, new RenderExtractedBlock());
@@ -326,17 +364,17 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityBloodSnail.class, new RenderBloodSnail());
 		RenderingRegistry.registerEntityRenderingHandler(EntityTitanBeetle.class, new RenderTitanBeetle());
 		RenderingRegistry.registerEntityRenderingHandler(EntityBotFlyLarva.class, new RenderBotFlyLarva());
-		RenderingRegistry.registerEntityRenderingHandler(EntitySporeling.class, new RenderSporeling(new ModelSporeling(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityWheatWeevil.class, new RenderWheatWeevil(new ModelWheatWeevil(), 0.3F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityCrushling.class, new RenderCrushling());
+		RenderingRegistry.registerEntityRenderingHandler(EntityWheatWeevil.class, new RenderWheatWeevil());
 		RenderingRegistry.registerEntityRenderingHandler(EntityGooBall.class, new RenderGooBall());
-		RenderingRegistry.registerEntityRenderingHandler(EntityWoodlouse.class, new RenderWoodlouse(new ModelWoodlouse(), 0.3F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWoodlouse.class, new RenderWoodlouse());
 		RenderingRegistry.registerEntityRenderingHandler(EntityWoodlouseBall.class, new WoodlouseBallItemRenderer());
-		RenderingRegistry.registerEntityRenderingHandler(EntityCicada.class, new RenderCicada(new ModelCicada(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityFireAntSoldier.class, new RenderFireAntSoldier(new ModelFireAntSoldier(), 0.5F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityCicada.class, new RenderCicada());
+		RenderingRegistry.registerEntityRenderingHandler(EntityFireAntSoldier.class, new RenderFireAntSoldier());
 		RenderingRegistry.registerEntityRenderingHandler(EntityMucusBombPrimed.class, new RenderMucusBombPrimed());
-		RenderingRegistry.registerEntityRenderingHandler(EntityLavaWebSpider.class, new RenderLavaWebSpider(new ModelLavaWebSpider(), 1.0F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityAntlionMiniBoss.class, new RenderAntlionMiniBoss(new ModelAntlion(), 0.3F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityChameleonTick.class, new RenderChameleonTick(new ModelChameleonTick(), 0.3F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityLavaWebSpider.class, new RenderLavaWebSpider());
+		RenderingRegistry.registerEntityRenderingHandler(EntityAntlionMiniBoss.class, new RenderAntlionMiniBoss());
+		RenderingRegistry.registerEntityRenderingHandler(EntityChameleonTick.class, new RenderChameleonTick());
 		RenderingRegistry.registerEntityRenderingHandler(EntitySolifugeSmall.class, new RenderSolifugeSmall());
 		RenderingRegistry.registerEntityRenderingHandler(EntityMidgeSwarm.class, new RenderMidgeSwarm());
 		RenderingRegistry.registerEntityRenderingHandler(EntityPunchroom.class, new RenderPunchroom());
@@ -357,6 +395,14 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityMagmaCrawler.class, new RenderMagmaCrawler());
 		RenderingRegistry.registerEntityRenderingHandler(EntityAntlionBoss.class, new RenderAntlionBoss());
 		RenderingRegistry.registerEntityRenderingHandler(EntityThrownSand.class, new RenderThrownSand());
+		RenderingRegistry.registerEntityRenderingHandler(EntityBombardierBeetle.class, new RenderBombardierBeetle());
+		RenderingRegistry.registerEntityRenderingHandler(EntityPreservedBlock.class, new RenderEntityPreservedBlock());
+		RenderingRegistry.registerEntityRenderingHandler(EntityHoneyPotAnt.class, new RenderHoneyPotAnt());
+		RenderingRegistry.registerEntityRenderingHandler(EntityBombardierBeetleLarva.class, new RenderBeetleLarva());
+		RenderingRegistry.registerEntityRenderingHandler(EntitySporeJet.class, new RenderSporeJet());
+		RenderingRegistry.registerEntityRenderingHandler(EntityZombieAntSoldier.class, new RenderZombieAntSoldier());
+		RenderingRegistry.registerEntityRenderingHandler(EntityBedBug.class, new RenderBedBug());
+		RenderingRegistry.registerEntityRenderingHandler(EntityStagBeetle.class, new RenderStagBeetle());
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityErebusAltar.class, new TileEntityErebusAltarRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityErebusAltarLightning.class, new TileEntityErebusAltarLightningRenderer());
@@ -372,13 +418,18 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBones.class, new TileEntityBoneBlockRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBambooPole.class, new TileEntityBambooPoleRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityExtenderThingy.class, new TileEntityExtenderThingyRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCraftingAltar.class, new TileEntityCraftingAltarRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityGlowGem.class, new TileEntityGlowGemRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityGaeanKeystone.class, new TileEntityGaeanKeystoneRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityOfferingAltar.class, new TileEntityOfferingAltarRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTarantulaEgg.class, new TileEntityTarantulaEggRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySmoothieMaker.class, new TileEntitySmoothieMakerRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAntlionEgg.class, new TileEntityAntlionEggRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPreservedBlock.class, new TileEntityPreservedBlockRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySoldierAntTrap.class, new TileEntitySoldierAntTrapRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySlidingBlockPuzzle.class, new TileEntitySlidingBlockPuzzleRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPuffShroom.class, new TileEntityPuffShroomRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCompletedPuzzle.class, new TileEntityCompletedPuzzleRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityArmchair.class, new TileEntityArmchairRenderer());
 
 		RenderingRegistry.registerBlockHandler(new BlockBambooCropRender());
 		RenderingRegistry.registerBlockHandler(new BlockHollowLogRender());
@@ -388,7 +439,6 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerBlockHandler(new BlockSiloRoofRender());
 		RenderingRegistry.registerBlockHandler(new BlockSiloSupportsRender());
 		RenderingRegistry.registerBlockHandler(new BlockComposterRender());
-		RenderingRegistry.registerBlockHandler(new BlockKeystoneRenderer());
 		RenderingRegistry.registerBlockHandler(new BlockDoublePlantRender());
 		RenderingRegistry.registerBlockHandler(new BlockVelocityBlockRender());
 		RenderingRegistry.registerBlockHandler(new BlockDoorRenderer());
@@ -404,7 +454,7 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.umberFurnace), new ItemUmberFurnaceRenderer());
 		MinecraftForgeClient.registerItemRenderer(ModItems.waspDagger, new WaspDaggerItemRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.bambooTorch), new BambooTorchItemRenderer());
-		MinecraftForgeClient.registerItemRenderer(ModItems.wandOfAnimation, new WandOfAnimationItemRenderer());
+		MinecraftForgeClient.registerItemRenderer(ModItems.wandOfAnimation, new ItemWandOfAnimationRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.glowingJar), new ItemGlowingJarRenderer());
 		MinecraftForgeClient.registerItemRenderer(ModItems.scorpionPincer, new ScorpionPincerItemRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.umberGolemStatue), new ItemUmberGolemStatueRenderer());
@@ -419,11 +469,14 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForgeClient.registerItemRenderer(ModItems.woodlouseBall, new WoodlouseBallItemRenderer());
 		MinecraftForgeClient.registerItemRenderer(ModItems.portalActivator, new PortalActivatorRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.offeringAltar), new ItemOfferingAltarRenderer());
-		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.craftingAltar), new ItemCraftingAltarRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.tarantulaEgg), new ItemTarantulaEggRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.smoothieMaker), new ItemSmoothieMakerRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.antlionEgg), new ItemAntlionEggRenderer());
 		MinecraftForgeClient.registerItemRenderer(ModItems.warHammer, new WarHammerItemRenderer());
+		MinecraftForgeClient.registerItemRenderer(ModItems.wandOfPreservation, new ItemWandOfPreservationRenderer());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.preservedBlock), new PreservedBlockitemRenderer());
+		MinecraftForgeClient.registerItemRenderer(ModItems.maxSpeedBow, new RenderMaxSpeedBow());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.armchair), new ArmchairItemRenderer());
 	}
 
 	@Override
@@ -439,6 +492,11 @@ public class ClientProxy extends CommonProxy {
 		if (particleName.equals("bubblegas")) {
 			fx = new EntityBubbleGasFX(world, x, y, z, vecX, vecY, vecZ);
 			fx.setRBGColorF(0.306F, 0.576F, 0.192F);
+		}
+
+		if (particleName.equals("bubblegasAcid")) {
+			fx = new EntityBubbleGasFX(world, x, y, z, vecX, vecY, vecZ);
+			fx.setRBGColorF(0.490F, 0.7451F, 0.6863F);
 		}
 
 		if (particleName.equals("swampflame")) {
@@ -483,5 +541,62 @@ public class ClientProxy extends CommonProxy {
 
 		if (fx != null)
 			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+	}
+
+	@Override
+	public GuiContainer getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+		GuiID guiID = GuiID.values()[ID];
+		TileEntity tile = world.getTileEntity(x, y, z);
+		Entity entity = world.getEntityByID(x);
+
+		switch (guiID) {
+			case ANIMATED_BAMBOO_CRATE:
+				if (entity != null && entity instanceof EntityAnimatedBambooCrate)
+					return new GuiErebusBasic(new ContainerAnimatedBambooCrate(player.inventory, (IInventory) entity), new ResourceLocation("erebus:textures/gui/container/bambooCrate.png"), (IInventory) entity, 168);
+			case ANT_INVENTORY:
+				if (entity != null && entity instanceof EntityBlackAnt)
+					return new GuiAntInventory(player.inventory, entity);
+			case BAMBOO_CRATE:
+				return new GuiErebusBasic(new ContainerBambooCrate(player.inventory, (TileEntityBambooCrate) tile), new ResourceLocation("erebus:textures/gui/container/bambooCrate.png"), (TileEntityBambooCrate) tile, 168);
+			case COLOSSAL_CRATE:
+				List<TileEntityBambooCrate> list = new ArrayList<TileEntityBambooCrate>();
+				for (int[] place : places) {
+					TileEntity te = world.getTileEntity(x + place[0], y + place[1], z + place[2]);
+					if (te != null && te instanceof TileEntityBambooCrate)
+						list.add((TileEntityBambooCrate) te);
+					else
+						return null;
+				}
+				return new GuiColossalCrate(player.inventory, list);
+			case COMPOSTER:
+				return new GuiComposter(player.inventory, (TileEntityComposter) tile);
+			case EXTENDER_THINGY:
+				return new GuiErebusBasic(new ContainerExtenderThingy(player.inventory, (TileEntityExtenderThingy) tile), new ResourceLocation("erebus:textures/gui/container/extenderThingy.png"), (TileEntityExtenderThingy) tile, 176, 136);
+			case HONEY_COMB:
+				return new GuiErebusBasic(new ContainerHoneyComb(player.inventory, (TileEntityHoneyComb) tile), new ResourceLocation("erebus:textures/gui/container/honeyCombGui.png"), (TileEntityHoneyComb) tile, 168);
+			case PETRIFIED_CHEST:
+				IInventory inventory = BlockPetrifiedChest.getInventory(world, x, y, z);
+				return new GuiPetrifiedChest(player.inventory, inventory);
+			case PETRIFIED_CRAFT:
+				return new GuiPetrifiedWorkbench(player.inventory, world, x, y, z);
+			case SILO_INVENTORY:
+				return new GuiErebusBasic(new ContainerSilo(player.inventory, (TileEntitySiloTank) tile), new ResourceLocation("erebus:textures/gui/container/siloGui.png"), (TileEntitySiloTank) tile, 256, 256);
+			case SMOOTHIE_MAKER:
+				return new GuiSmoothieMaker(player.inventory, (TileEntitySmoothieMaker) tile);
+			case UMBER_FURNACE:
+				return new GuiUmberFurnace(player.inventory, (TileEntityUmberFurnace) tile);
+			default:
+				return null;
+		}
+	}
+
+	@Override
+	public World getClientWorld() {
+		return Minecraft.getMinecraft().theWorld;
+	}
+
+	@Override
+	public EntityPlayer getClientPlayer() {
+		return Minecraft.getMinecraft().thePlayer;
 	}
 }

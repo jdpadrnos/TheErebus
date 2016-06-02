@@ -3,13 +3,13 @@ package erebus.block.ores;
 import java.util.ArrayList;
 import java.util.Random;
 
+import erebus.ModItems;
+import erebus.item.ItemMaterials;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import erebus.ModItems;
-import erebus.item.ItemMaterials;
 
 public class UmberOreFossil extends UmberOre {
 
@@ -34,7 +34,7 @@ public class UmberOreFossil extends UmberOre {
 		}
 
 		if (world.rand.nextInt(10 - Math.min(6, fortune * 2)) == 0) {
-			drops.add(ItemMaterials.DATA.altarFragment.createStack());
+			drops.add(ItemMaterials.DATA.ALTAR_FRAGMENT.makeStack());
 			return drops;
 		}
 
@@ -47,7 +47,7 @@ public class UmberOreFossil extends UmberOre {
 				meta = 0;
 			} else {
 				item = ModItems.materials;
-				meta = ItemMaterials.DATA.shardBone.ordinal();
+				meta = ItemMaterials.DATA.SHARD_BONE.ordinal();
 			}
 
 			drops.add(new ItemStack(item, 1, meta));

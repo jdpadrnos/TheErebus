@@ -10,6 +10,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import erebus.core.handler.configs.ConfigHandler;
 
 public abstract class EntityMobBlock extends EntityCreature implements IMob {
 
@@ -26,8 +27,6 @@ public abstract class EntityMobBlock extends EntityCreature implements IMob {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL)
-			setDead();
 	}
 
 	@Override
@@ -97,6 +96,7 @@ public abstract class EntityMobBlock extends EntityCreature implements IMob {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 2D : 2D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
+		
 	}
 }

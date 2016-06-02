@@ -11,6 +11,7 @@ import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.entity.ai.EntityErebusAIAttackOnCollide;
 import erebus.item.ItemMaterials;
 
@@ -30,11 +31,6 @@ public class EntitySolifuge extends EntityMob {
 	}
 
 	@Override
-	protected void entityInit() {
-		super.entityInit();
-	}
-
-	@Override
 	public boolean isAIEnabled() {
 		return true;
 	}
@@ -43,8 +39,8 @@ public class EntitySolifuge extends EntityMob {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(1.5D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(30.0D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 30D : 30D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 4D : 4D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
 	}
 
@@ -91,12 +87,12 @@ public class EntitySolifuge extends EntityMob {
 		int chance = rand.nextInt(4) + rand.nextInt(1 + looting);
 		int amount;
 		for (amount = 0; amount < chance; ++amount)
-			entityDropItem(ItemMaterials.DATA.bioVelocity.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.BIO_VELOCITY.makeStack(), 0.0F);
 	}
 
 	@Override
 	protected void dropRareDrop(int looting) {
-		entityDropItem(ItemMaterials.DATA.supernaturalvelocity.createStack(), 0.0F);
+		entityDropItem(ItemMaterials.DATA.SUPERNATURAL_VELOCITY.makeStack(), 0.0F);
 	}
 
 	@Override
@@ -105,15 +101,11 @@ public class EntitySolifuge extends EntityMob {
 	}
 
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
-	}
-
-	@Override
 	public void setDead() {
 		super.setDead();
-		if (!worldObj.isRemote)
-			for (int a = 0; a < 4; a++) {
+
+		if (!worldObj.isRemote && getHealth() <= 0.0F)
+			for (int i = 0; i < 4; i++) {
 				EntitySolifugeSmall entitySolifugeSmall = new EntitySolifugeSmall(worldObj);
 				entitySolifugeSmall.setPosition(posX + (rand.nextFloat() * 0.03D - rand.nextFloat() * 0.03D), posY + 1, posZ + (rand.nextFloat() * 0.03D - rand.nextFloat() * 0.03D));
 				entitySolifugeSmall.setPotionEffect(Byte.valueOf((byte) rand.nextInt(8)));

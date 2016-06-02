@@ -31,7 +31,8 @@ public class WorldGenRedGem extends WorldGenerator{
 						++adjacent;
 
 				if (adjacent == 1)
-					world.setBlock(xx,yy,zz,ModBlocks.redGem);
+					if(world.blockExists(xx,yy,zz))
+						world.setBlock(xx,yy,zz,ModBlocks.redGem);
 			}
 
 			if (++distUpd > 22 + dist * 30){

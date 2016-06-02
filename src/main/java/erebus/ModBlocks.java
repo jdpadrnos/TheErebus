@@ -12,16 +12,22 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import cpw.mods.fml.common.registry.GameRegistry;
 import erebus.block.BlockAmber;
+import erebus.block.BlockAnthillBlock;
 import erebus.block.BlockAntlionEgg;
 import erebus.block.BlockAntlionSpawner;
+import erebus.block.BlockArmchair;
 import erebus.block.BlockBones;
 import erebus.block.BlockButtonUmberstone;
 import erebus.block.BlockCapstone;
+import erebus.block.BlockCompletedPuzzle;
 import erebus.block.BlockComposter;
 import erebus.block.BlockDoorErebus;
+import erebus.block.BlockDragonflySpawner;
 import erebus.block.BlockErebusHoney;
 import erebus.block.BlockErebusStigma;
 import erebus.block.BlockForceField;
+import erebus.block.BlockForceLock;
+import erebus.block.BlockFormicAcid;
 import erebus.block.BlockGhostSand;
 import erebus.block.BlockGlowGem;
 import erebus.block.BlockGlowingJar;
@@ -37,10 +43,14 @@ import erebus.block.BlockPetrifiedChest;
 import erebus.block.BlockPetrifiedCraftingTable;
 import erebus.block.BlockPlanksErebus;
 import erebus.block.BlockPlantedGiantFlower;
+import erebus.block.BlockPreservedBlock;
+import erebus.block.BlockPuffShroom;
 import erebus.block.BlockQuickSand;
 import erebus.block.BlockRedGem;
 import erebus.block.BlockSimple;
 import erebus.block.BlockSlabStone;
+import erebus.block.BlockSlidingBlockPuzzle;
+import erebus.block.BlockSoldierAntTrap;
 import erebus.block.BlockSpiderSpawner;
 import erebus.block.BlockStairsBase;
 import erebus.block.BlockSwampVent;
@@ -57,6 +67,7 @@ import erebus.block.BlockWallErebus;
 import erebus.block.BlockWaspNest;
 import erebus.block.BlockWaspSpawner;
 import erebus.block.BlockWitherWeb;
+import erebus.block.BlockZombieAntSpawner;
 import erebus.block.ErebusPortal;
 import erebus.block.GaeanKeystone;
 import erebus.block.InsectRepellent;
@@ -65,7 +76,6 @@ import erebus.block.LightningSpeedBlock;
 import erebus.block.SaplessLog;
 import erebus.block.VelocityBlock;
 import erebus.block.altars.AltarBase;
-import erebus.block.altars.CraftingAltar;
 import erebus.block.altars.HealingAltar;
 import erebus.block.altars.LightningAltar;
 import erebus.block.altars.OfferingAltar;
@@ -102,15 +112,18 @@ import erebus.block.ores.UmberOreFossil;
 import erebus.block.ores.UmberOreGneiss;
 import erebus.block.ores.UmberOreJade;
 import erebus.block.ores.UmberOrePetrifiedWood;
+import erebus.block.ores.UmberOreQuartz;
 import erebus.block.plants.BlockAlgae;
 import erebus.block.plants.BlockBerryBush;
 import erebus.block.plants.BlockCabbage;
 import erebus.block.plants.BlockErebusFlower;
 import erebus.block.plants.BlockHangerPlants;
 import erebus.block.plants.BlockMireCoral;
+import erebus.block.plants.BlockPricklyPair;
 import erebus.block.plants.BlockThorns;
 import erebus.block.plants.BlockTurnip;
 import erebus.block.plants.BlockWallPlants;
+import erebus.block.plants.BlockWallPlantsCultivated;
 import erebus.block.plants.DoubleHeightPlant;
 import erebus.block.plants.ErebusHugeMushroom;
 import erebus.block.plants.SmallMushroom;
@@ -136,7 +149,7 @@ public class ModBlocks {
 	public static final Block ghostSand = new BlockGhostSand();
 	public static final Block umberstoneButton = new BlockButtonUmberstone();
 	public static final Block volcanicRock = new BlockSimple(Material.rock).setHardness(5.0F).setResistance(20.0F).setStepSound(Block.soundTypeStone).setBlockName("erebus.volcanicRock").setBlockTextureName("erebus:volcanicRock");
-	public static final Block swampVent = new BlockSwampVent().setBlockName("erebus.swampVent");
+	public static final Block swampVent = new BlockSwampVent();
 	public static final Block umbergravel = new BlockUmberGravel();
 
 	// ORES
@@ -151,6 +164,7 @@ public class ModBlocks {
 	public static final Block orePetrifiedWood = new UmberOrePetrifiedWood();
 	public static final Block oreFossil = new UmberOreFossil();
 	public static final Block oreGneiss = new UmberOreGneiss();
+	public static final Block oreQuartz = new UmberOreQuartz();
 	public static final Block oreAluminium = new UmberOreExtra("Aluminium", 1);
 	public static final Block oreCopper = new UmberOreExtra("Copper", 1);
 	public static final Block oreLead = new UmberOreExtra("Lead", 2);
@@ -184,21 +198,22 @@ public class ModBlocks {
 	public static final Block nettleFlowered = new SmallPlant("nettleFlowered", false);
 	public static final Block nettle = new SmallPlant("nettle", false);
 	public static final Block desertShrub = new SmallPlant("desertShrub", false);
-	public static final Block bulbCapped = new SmallMushroom("bulbCappedShroom");
-	public static final Block kaizerfinger = new SmallMushroom("kaizerfinger");
-	public static final Block bundleshroom = new SmallMushroom("bundleshroom");
-	public static final Block greenMushroom = new SmallMushroom("greenMushroom");
-	public static final Block dutchCap = new SmallMushroom("dutchCap");
+	public static final Block darkCapped = new SmallMushroom("bulbCappedShroom", "bulb_capped_shroom", false);
+	public static final Block kaizersFinger = new SmallMushroom("kaizerfinger", "kaizers_fingers", false);
+	public static final Block sarcasticCzech = new SmallMushroom("bundleshroom", "bundle_shroom", true);
+	public static final Block grandmasShoes = new SmallMushroom("greenMushroom", "green_mushroom", true);
+	public static final Block dutchCap = new SmallMushroom("dutchCap", "dutch_cap", true);
 
 	// UNDERGROWTH
 	public static final Block thorns = new BlockThorns();
 	public static final Block blockTurnip = new BlockTurnip();
 	public static final Block hanger = new BlockHangerPlants();
 	public static final Block wallPlants = new BlockWallPlants();
-	public static final Block bigBulbCappedMushroom = new ErebusHugeMushroom(0, "bulbcapped", bulbCapped);
-	public static final Block bigGreenMushroom = new ErebusHugeMushroom(1, "green", greenMushroom);
-	public static final Block bigBundleMushroom = new ErebusHugeMushroom(2, "bundleshroom", bundleshroom);
-	public static final Block bigKaiserfingerMushroom = new ErebusHugeMushroom(3, "kaizerfinger", kaizerfinger);
+	public static final Block wallPlantsCultivated = new BlockWallPlantsCultivated();
+	public static final Block bigBulbCappedMushroom = new ErebusHugeMushroom(0, "bulbcapped", darkCapped);
+	public static final Block bigGreenMushroom = new ErebusHugeMushroom(1, "green", grandmasShoes);
+	public static final Block bigBundleMushroom = new ErebusHugeMushroom(2, "bundleshroom", sarcasticCzech);
+	public static final Block bigKaiserfingerMushroom = new ErebusHugeMushroom(3, "kaizerfinger", kaizersFinger);
 	public static final Block bigDutchCapMushroom = new ErebusHugeMushroom(4, "dutchcap", dutchCap);
 	public static final Block glowshroom = new BlockGlowshroom();
 	public static final Block glowshroomStalkMain = new BlockGlowshroomStalkMain();
@@ -222,7 +237,9 @@ public class ModBlocks {
 	public static final Block mireCoral = new BlockMireCoral().setHardness(0.2F).setStepSound(Block.soundTypeGrass).setBlockName("erebus.mireCoral").setBlockTextureName("erebus:swampGlowWeed").setLightLevel(0.8F);
 	public static final Block algae = new BlockAlgae().setBlockName("erebus.algae").setBlockTextureName("erebus:algae");
 	public static final Block blockCabbage = new BlockCabbage();
-
+	public static final Block giantLilyPad = new BlockSimple(Material.wood, "axe", 1).setHardness(5.0F).setStepSound(Block.soundTypeGrass).setBlockName("erebus.giantLilyPad").setBlockTextureName("erebus:giantLilyPad").setCreativeTab(ModTabs.blocks);
+	public static final Block pricklyPair = new BlockPricklyPair();
+	
 	// DECORATIONS AND UTILITIES
 	public static final Block blockSilk = new BlockSimple(Material.cloth).setHardness(0.2F).setStepSound(Block.soundTypeCloth).setBlockName("erebus.blockSilk").setBlockTextureName("erebus:blockSilk").setCreativeTab(ModTabs.blocks);
 	public static final Block mirBrick = new BlockSimple(Material.rock, "pickaxe", 1).setHardness(1.5F).setStepSound(Block.soundTypeStone).setBlockName("erebus.mirbrick").setBlockTextureName("erebus:mirbrick").setCreativeTab(ModTabs.blocks);
@@ -259,6 +276,7 @@ public class ModBlocks {
 	public static final Block siloTank = new BlockSiloTank(Material.iron).setHardness(3F).setStepSound(Block.soundTypeMetal).setBlockName("erebus.siloTank");
 	public static final Block siloRoof = new BlockSiloRoof(Material.iron).setHardness(3F).setStepSound(Block.soundTypeMetal).setBlockName("erebus.siloRoof").setBlockTextureName("erebus:siloRoof");
 	public static final Block composter = new BlockComposter().setHardness(3.5F).setStepSound(Block.soundTypeStone).setBlockName("erebus.composter");
+	public static final Block formicAcid = new BlockFormicAcid();
 
 	// DOORS
 	public static final Block doorAmber = new BlockDoorErebus("amber", Material.glass).setRenderPass(1);
@@ -283,7 +301,6 @@ public class ModBlocks {
 	public static final Block altarHealing = new HealingAltar().setBlockName("erebus.altarHealing");
 	public static final Block altarXP = new XPAltar().setBlockName("erebus.altarXP");
 	public static final Block altarRepair = new RepairAltar().setBlockName("erebus.altarRepair");
-	public static final Block craftingAltar = new CraftingAltar();
 	public static final Block offeringAltar = new OfferingAltar();
 
 	// DUNGEONS
@@ -293,6 +310,12 @@ public class ModBlocks {
 	public static final Block waspSpawner = new BlockWaspSpawner("wasp").setBlockName("erebus.waspSpawner").setBlockTextureName("erebus:waspNestSpawner");
 	public static final Block antlionSpawner = new BlockAntlionSpawner("antlion").setBlockName("erebus.antlionSpawner").setBlockTextureName("erebus:spiderSpawner");
 	public static final Block magmaCrawlerSpawner = new BlockMagmaCrawlerSpawner("magmaCrawler").setBlockName("erebus.magmaCrawlerSpawner").setBlockTextureName("erebus:spiderSpawner");
+	public static final Block dragonflySpawner = new BlockDragonflySpawner("dragonfly").setBlockName("erebus.dragonflySpawner").setBlockTextureName("erebus:spiderSpawner");
+	public static final Block slidingBlockPuzzle = new BlockSlidingBlockPuzzle();
+	public static final Block completedPuzzle = new BlockCompletedPuzzle();
+	public static final Block forceLock = new BlockForceLock();
+	public static final Block zombieAntSpawner = new BlockZombieAntSpawner("zombieAnt").setBlockName("erebus.zombieAntSpawner").setBlockTextureName("erebus:ant_spawner");
+	public static final Block zombieAntSoldierSpawner = new BlockZombieAntSpawner("zombieAntSoldier").setBlockName("erebus.zombieAntSoldierSpawner").setBlockTextureName("erebus:ant_spawner");
 
 	public static final Block capstone = new BlockCapstone();
 	public static final Block waspNestBlock = new BlockWaspNest();
@@ -304,15 +327,19 @@ public class ModBlocks {
 	public static final Block templeBrickUnbreaking = new BlockTempleBrickUnbreaking();
 	public static final Block templeTeleporter = new BlockTempleTeleporter().setStepSound(Block.soundTypeStone).setBlockTextureName("erebus:templeBrick");
 	public static final Block forceField = new BlockForceField().setBlockTextureName("erebus:forceField");
+	public static final Block anthillBlock = new BlockAnthillBlock();
+	public static final Block soldierAntTrap = new BlockSoldierAntTrap();
+	public static final Block puffShroom = new BlockPuffShroom();
 
 	// STAIRS, SLABS, WALLS
 	public static final Block[] umbercobbleStairs = new Block[BlockUmberstone.iconPaths.length];
 	public static final Block[] stoneSlabs = new Block[8];
 	public static final Block[] gneissStairs = new Block[BlockGneiss.iconPaths.length];
 	public static final Block wall = new BlockWallErebus();
-	public static final Block petrifiedWoodStairs = new BlockStairsBase(petrifiedWoodPlanks, 0).setStepSound(Block.soundTypeWood).setBlockName("erebus.petrifiedWoodStairs");
-	public static final Block amberBrickStairs = new BlockStairsBase(amber, 2).setStepSound(Block.soundTypeStone).setBlockName("erebus.amberBrickStairs");
-	public static final Block waspNestStairs = new BlockStairsBase(waspNestBlock, 2).setHardness(50.0F).setStepSound(Block.soundTypeStone).setBlockName("erebus.waspNestStairs");
+	public static final Block petrifiedWoodStairs = new BlockStairsBase(petrifiedWoodPlanks, 0).setBlockName("erebus.petrifiedWoodStairs");
+	public static final Block amberBrickStairs = new BlockStairsBase(amber, 2).setBlockName("erebus.amberBrickStairs");
+	public static final Block waspNestStairs = new BlockStairsBase(waspNestBlock, 2).setHardness(50.0F).setBlockName("erebus.waspNestStairs");
+	public static final Block anthillStairs = new BlockStairsBase(anthillBlock, 0).setBlockUnbreakable().setBlockName("erebus.anthillStairs");
 
 	// COOKING
 	public static final Block smoothieMaker = new BlockSmoothieMaker();
@@ -321,6 +348,8 @@ public class ModBlocks {
 	public static final Block gaeanKeystone = new GaeanKeystone();
 	public static final Block tarantulaEgg = new BlockTarantulaEgg();
 	public static final Block antlionEgg = new BlockAntlionEgg();
+	public static final Block preservedBlock = new BlockPreservedBlock();
+	public static final Block armchair = new BlockArmchair();
 
 	public static void init() {
 		initBlocks();
@@ -332,14 +361,14 @@ public class ModBlocks {
 
 	private static void initBlocks() {
 		for (int i = 0; i < umbercobbleStairs.length; i++)
-			umbercobbleStairs[i] = new BlockStairsBase(umberstone, i).setStepSound(Block.soundTypeStone).setBlockName("erebus.umbercobbleStairs" + i);
+			umbercobbleStairs[i] = new BlockStairsBase(umberstone, i).setBlockName("erebus.umbercobbleStairs" + i);
 		for (int i = 0; i <= 4; i++)
-			stoneSlabs[i] = new BlockSlabStone(ModBlocks.umberstone, i);
+			stoneSlabs[i] = new BlockSlabStone(ModBlocks.umberstone, i, BlockUmberstone.iconPaths[i]);
 		for (int i = 0; i <= 2; i++)
-			stoneSlabs[5 + i] = new BlockSlabStone(ModBlocks.umberPaver, i);
-		stoneSlabs[7] = new BlockSlabStone(ModBlocks.petrifiedWoodPlanks);
+			stoneSlabs[5 + i] = new BlockSlabStone(ModBlocks.umberPaver, i, "umberpaver" + BlockUmberPaver.types[i]);
+		stoneSlabs[7] = new BlockSlabStone(ModBlocks.petrifiedWoodPlanks, "petrifiedWood");
 		for (int i = 0; i < gneissStairs.length; i++)
-			gneissStairs[i] = new BlockStairsBase(gneiss, i).setStepSound(Block.soundTypeStone).setBlockName("erebus.gneissStairs" + i);
+			gneissStairs[i] = new BlockStairsBase(gneiss, i).setBlockName("erebus.gneissStairs" + i);
 	}
 
 	private static void registerBlocks() {
@@ -362,8 +391,8 @@ public class ModBlocks {
 		String name = block.getUnlocalizedName();
 		String[] strings = name.split("\\.");
 
-		if (block instanceof ISubBlocksBlock)
-			GameRegistry.registerBlock(block, ((ISubBlocksBlock) block).getItemBlockClass(), strings[strings.length - 1]);
+		if (block instanceof IHasCustomItemBlock)
+			GameRegistry.registerBlock(block, ((IHasCustomItemBlock) block).getItemBlockClass(), strings[strings.length - 1]);
 		else
 			GameRegistry.registerBlock(block, strings[strings.length - 1]);
 	}
@@ -376,7 +405,7 @@ public class ModBlocks {
 		Blocks.fire.setFireInfo(thorns, 15, 100);
 	}
 
-	public static interface ISubBlocksBlock {
+	public static interface IHasCustomItemBlock {
 
 		Class<? extends ItemBlock> getItemBlockClass();
 	}

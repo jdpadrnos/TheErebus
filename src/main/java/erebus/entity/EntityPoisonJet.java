@@ -46,18 +46,15 @@ public class EntityPoisonJet extends EntityThrowable {
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-
 		if (mop.entityHit != null) {
-
 			if (mop.entityHit instanceof EntityLivingBase) {
 				if (!worldObj.isRemote) {
 					((EntityLivingBase) mop.entityHit).addPotionEffect(new PotionEffect(Potion.poison.id, 5 * 20, 0));
 					((EntityLivingBase) mop.entityHit).attackEntityFrom(DamageSource.causeMobDamage(getThrower()), 1.0F);
 				}
-				setDead();
 			}
-		} else
-			setDead();
+		}
+		setDead();
 	}
 
 	@Override

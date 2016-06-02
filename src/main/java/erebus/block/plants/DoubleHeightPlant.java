@@ -3,6 +3,12 @@ package erebus.block.plants;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import erebus.ModItems;
+import erebus.ModTabs;
+import erebus.core.proxy.ClientProxy.BlockRenderIDs;
+import erebus.item.ItemMaterials;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -14,12 +20,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IShearable;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import erebus.ModItems;
-import erebus.ModTabs;
-import erebus.core.proxy.ClientProxy.BlockRenderIDs;
-import erebus.item.ItemMaterials;
 
 public class DoubleHeightPlant extends BlockDoublePlant implements IShearable {
 	@SideOnly(Side.CLIENT)
@@ -50,11 +50,11 @@ public class DoubleHeightPlant extends BlockDoublePlant implements IShearable {
 			return drops;
 
 		if ("Sundew".equals(name))
-			drops.add(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.bioLuminescence.ordinal()));
+			drops.add(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.BIO_LUMINESCENCE.ordinal()));
 		else if ("WeepingBlue".equals(name))
-			drops.add(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.weepingBluePetal.ordinal()));
+			drops.add(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.WEEPING_BLUE_PETAL.ordinal()));
 		else if ("Bullrush".equals(name))
-			drops.add(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.papyrus.ordinal()));
+			drops.add(new ItemStack(ModItems.materials, 1, ItemMaterials.DATA.PAPYRUS.ordinal()));
 		else if ("WaterFlower".equals(name))
 			drops.add(new ItemStack(this));
 		else {

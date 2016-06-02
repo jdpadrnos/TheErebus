@@ -4,28 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import erebus.ModBlocks;
+import erebus.ModBlocks.IHasCustomItemBlock;
+import erebus.ModItems;
+import erebus.ModTabs;
+import erebus.item.ItemMaterials;
+import erebus.item.block.ItemBlockColoured;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import erebus.ModBlocks;
-import erebus.ModItems;
-import erebus.ModTabs;
-import erebus.item.ItemMaterials;
 
-public class SmallPlant extends BlockTallGrass {
+public class SmallPlant extends BlockTallGrass implements IHasCustomItemBlock {
+
 	protected final String name;
 	protected final boolean colour;
 
 	public SmallPlant(String name, boolean colour) {
-		super();
 		this.name = name;
 		setHardness(0.0F);
 		this.colour = colour;
@@ -57,17 +60,17 @@ public class SmallPlant extends BlockTallGrass {
 	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int meta, int fortune) {
 		if ("nettle".equals(name)) {
 			ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
-			ret.add(ItemMaterials.DATA.nettleleaves.createStack());
+			ret.add(ItemMaterials.DATA.NETTLE_LEAVES.makeStack());
 			return ret;
 		} else if ("nettleFlowered".equals(name)) {
 			ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
-			ret.add(ItemMaterials.DATA.nettleflowers.createStack());
+			ret.add(ItemMaterials.DATA.NETTLE_FLOWERS.makeStack());
 			return ret;
 		} else if ("swampPlant".equals(name) && world.rand.nextInt(8) == 0) {
 			ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
 			ret.add(new ItemStack(ModItems.cabbageSeeds, 1, 0));
 			return ret;
-		} else if ("desertShrub".equals(name) || "mireCoral".equals(name) || "fireBloom".equals(name) || "swampPlant".equals(name)) {
+		} else if ("desertShrub".equals(name) || "mireCoral".equals(name) || "fireBloom".equals(name)) {
 			ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
 			ret.add(new ItemStack(this));
 			return ret;
@@ -111,5 +114,10 @@ public class SmallPlant extends BlockTallGrass {
 	public void randomDisplayTick(World world, int x, int y, int z, Random rand) {
 		if ("fireBloom".equals(name))
 			world.spawnParticle("flame", x + 0.5F, y + 1F, z + 0.5F, 0.0D, 0.0D, 0.0D);
+	}
+
+	@Override
+	public Class<? extends ItemBlock> getItemBlockClass() {
+		return ItemBlockColoured.class;
 	}
 }

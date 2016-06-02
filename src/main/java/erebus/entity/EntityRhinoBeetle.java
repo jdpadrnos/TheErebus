@@ -27,6 +27,7 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import erebus.ModItems;
 import erebus.core.handler.KeyBindingHandler;
+import erebus.core.handler.configs.ConfigHandler;
 import erebus.item.ItemMaterials;
 import erebus.network.PacketPipeline;
 import erebus.network.server.PacketBeetleRamAttack;
@@ -67,7 +68,7 @@ public class EntityRhinoBeetle extends EntityTameable {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.7D);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(60.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 60D : 60D * ConfigHandler.INSTANCE.mobHealthMultipier);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(8.0D);
 		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(0.75D);
 	}
@@ -131,31 +132,31 @@ public class EntityRhinoBeetle extends EntityTameable {
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int looting) {
 		if (getTameState() == 2)
-			entityDropItem(ItemMaterials.DATA.rhinoRidingKit.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.RHINO_RIDING_KIT.makeStack(), 0.0F);
 		int dropRate = 1 + rand.nextInt(2 + looting);
 		for (int a = 0; a < dropRate; ++a)
-			entityDropItem(ItemMaterials.DATA.plateExoRhino.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.PLATE_EXO_RHINO.makeStack(), 0.0F);
 		if (rand.nextInt(20) == 0)
-			entityDropItem(ItemMaterials.DATA.rhinoBeetleHorn.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.RHINO_BEETLE_HORN.makeStack(), 0.0F);
 	}
 
 	@Override
 	public boolean interact(EntityPlayer player) {
 		ItemStack is = player.inventory.getCurrentItem();
 		float healingBuff = 0.0F;
-		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.beetleTamingAmulet.ordinal() && getTameState() == 0) {
-			healingBuff = 20F;
+		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.BEETLE_TAMING_AMULET.ordinal() && getTameState() == 0) {
+			healingBuff = (float) (ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 20D : 20D * ConfigHandler.INSTANCE.mobHealthMultipier);
 			is.stackSize--;
 			setTameState((byte) 1);
 			playTameEffect(true);
 			player.swingItem();
 			tasks.removeTask(aiNearestAttackableTarget);
 			setAttackTarget((EntityLivingBase) null);
-			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(80.0D);
+			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 80D : 80D * ConfigHandler.INSTANCE.mobHealthMultipier);
 			heal(healingBuff);
 			return true;
 		}
-		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.rhinoRidingKit.ordinal() && getTameState() == 1) {
+		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.RHINO_RIDING_KIT.ordinal() && getTameState() == 1) {
 			is.stackSize--;
 			player.swingItem();
 			setTameState((byte) 2);
@@ -164,6 +165,7 @@ public class EntityRhinoBeetle extends EntityTameable {
 		if (is != null && is.getItem() == ModItems.turnip && !shagging() && getTameState() != 0) {
 			is.stackSize--;
 			shagCount = 600;
+			worldObj.playSoundEffect(posX, posY, posZ, "erebus:beetlelarvamunch", 1.0F, 0.75F);
 			return true;
 		}
 		if (is == null && getTameState() == 2) {
@@ -171,8 +173,8 @@ public class EntityRhinoBeetle extends EntityTameable {
 				player.mountEntity(this);
 			return true;
 		}
-		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.bambooShoot.ordinal() && getTameState() != 0) {
-			healingBuff = 5.0F;
+		if (is != null && is.getItem() == ModItems.materials && is.getItemDamage() == ItemMaterials.DATA.BAMBOO_SHOOT.ordinal() && getTameState() != 0) {
+			healingBuff = (float) (ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 5D : 5D * ConfigHandler.INSTANCE.mobHealthMultipier);
 			if (getHealth() < getMaxHealth()) {
 				heal(healingBuff);
 				playTameEffect(true);
@@ -219,17 +221,19 @@ public class EntityRhinoBeetle extends EntityTameable {
 				setAttackTarget((EntityLivingBase) null);
 				return false;
 			}
-		return ram(entity, 1F, 6F);
+		return ram(entity, 1F, (float) (ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 6D : 6D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier));
 	}
 
 	private boolean ram(Entity entity, float knockback, float damage) {
 		if (getTameState() == 0 || riddenByEntity == null)
 			setRammingCharge((byte) 32);
-		entity.attackEntityFrom(DamageSource.causeMobDamage(this), (int) damage);
-		entity.addVelocity(-MathHelper.sin(rotationYaw * 3.141593F / 180.0F) * knockback, 0.4D, MathHelper.cos(rotationYaw * 3.141593F / 180.0F) * knockback);
-		worldObj.playSoundAtEntity(entity, "game.player.hurt.fall.big", 1.0F, 1.0F);
-		((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, worldObj.difficultySetting.ordinal() * 50, 0));
-		setRamAttack(false);
+		if (!worldObj.isRemote && entity.boundingBox.maxY >= boundingBox.minY && entity.boundingBox.minY <= boundingBox.maxY && entity.boundingBox.maxX >= boundingBox.minX - 0.25D && entity.boundingBox.minX <= boundingBox.maxX + 0.25D && entity.boundingBox.maxZ >= boundingBox.minZ - 0.25D && entity.boundingBox.minZ <= boundingBox.maxZ + 0.25D) {
+			entity.attackEntityFrom(DamageSource.causeMobDamage(this), (int) damage);
+			entity.addVelocity(-MathHelper.sin(rotationYaw * 3.141593F / 180.0F) * knockback, 0.4D, MathHelper.cos(rotationYaw * 3.141593F / 180.0F) * knockback);
+			worldObj.playSoundAtEntity(entity, "game.player.hurt.fall.big", 1.0F, 1.0F);
+			((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, worldObj.difficultySetting.ordinal() * 50, 0));
+			setRamAttack(false);
+		}
 		return true;
 	}
 

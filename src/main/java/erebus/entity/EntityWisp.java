@@ -1,12 +1,16 @@
 package erebus.entity;
 
+import java.util.List;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
@@ -25,26 +29,28 @@ public class EntityWisp extends EntityMob {
 	public int lastZ;
 	private float particleSpawnTick;
 	public float particleSize;
+	private boolean triggerOnce;
 
 	public EntityWisp(World world) {
 		super(world);
 		setSize(0.5F, 0.5F);
 		experienceValue = 2;
-		renderDistanceWeight = 64;
+	}
+
+	@Override
+	protected void entityInit() {
+		super.entityInit();
+		dataWatcher.addObject(30, new Byte((byte) 0));
 	}
 
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(5.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 5D : 5D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 1D : 1D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(0.5D);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(8.0D);
 	}
-
-	/*
-	 * protected String getLivingSound() { return "mob.zombie"; } protected String getHurtSound() { return "mob.zombiehurt"; } protected String getDeathSound() { return "mob.zombiedeath"; }
-	 */
 
 	@Override
 	protected void fall(float distance) {
@@ -106,15 +112,16 @@ public class EntityWisp extends EntityMob {
 
 	@Override
 	public void onUpdate() {
+		super.onUpdate();
+		if (!worldObj.isRemote)
+			findNearEntity();
 		if (worldObj.isRemote && isGlowing())
 			lightUp(worldObj, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
 		if (worldObj.isRemote && !isGlowing())
 			switchOff();
 		if (!worldObj.isRemote)
 			if (worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY) - 1, MathHelper.floor_double(posZ)) == Blocks.water)
-				;
-		motionY += 0.1D;
-		super.onUpdate();
+				motionY += 0.1D;
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -131,18 +138,43 @@ public class EntityWisp extends EntityMob {
 						lastY = y;
 						lastZ = z;
 					}
+		triggerOnce = true;
 	}
 
 	@SideOnly(Side.CLIENT)
 	private void switchOff() {
 		if (!ConfigHandler.INSTANCE.bioluminescence)
 			return;
-		worldObj.updateLightByType(EnumSkyBlock.Block, lastX, lastY, lastZ);
-		worldObj.updateLightByType(EnumSkyBlock.Block, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
+		if(triggerOnce) {
+			worldObj.updateLightByType(EnumSkyBlock.Block, lastX, lastY, lastZ);
+			worldObj.updateLightByType(EnumSkyBlock.Block, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
+			triggerOnce = false;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Entity findNearEntity() {
+		List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox(posX - 0.5D, posY - 0.5D, posZ - 0.5D, posX + 0.5D, posY + 0.5D, posZ + 0.5D).expand(16D, 16D, 16D));
+		for (int i = 0; i < list.size(); i++) {
+			Entity entity = list.get(i);
+			if (entity != null && !getIsNearEntity())
+				setIsNearEntity(true);
+		}
+		if (list.isEmpty() && getIsNearEntity())
+			setIsNearEntity(false);
+		return null;
 	}
 
 	public boolean isGlowing() {
-		return worldObj.getSunBrightness(1.0F) < 0.5F;
+		return worldObj.getSunBrightness(1.0F) < 0.5F && getIsNearEntity();
+	}
+
+	public void setIsNearEntity(boolean entityNear) {
+		dataWatcher.updateObject(30, entityNear ? (byte) 1 : (byte) 0);
+	}
+
+	public boolean getIsNearEntity() {
+		return dataWatcher.getWatchableObjectByte(30) == 1 ? true : false;
 	}
 
 	@Override
@@ -157,7 +189,7 @@ public class EntityWisp extends EntityMob {
 		int chance = rand.nextInt(4) + rand.nextInt(1 + looting);
 		int amount;
 		for (amount = 0; amount < chance; ++amount)
-			entityDropItem(ItemMaterials.DATA.bioLuminescence.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.BIO_LUMINESCENCE.makeStack(), 0.0F);
 	}
 
 	@Override

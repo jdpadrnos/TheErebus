@@ -22,6 +22,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import erebus.ModItems;
 import erebus.client.render.entity.AnimationMathHelper;
+import erebus.core.handler.configs.ConfigHandler;
 
 public class EntityMosquito extends EntityMob {
 	private final static int maxBloodLevel = 5;
@@ -205,9 +206,11 @@ public class EntityMosquito extends EntityMob {
 	}
 
 	@Override
-	protected void dropFewItems(boolean par1, int par2) {
-		int i = 1 + getBloodConsumed();
-		dropItem(ModItems.lifeBlood, i);
+	protected void dropFewItems(boolean recentlyHit, int amount) {
+		if (recentlyHit) {
+			int count = 1 + getBloodConsumed();
+			dropItem(ModItems.lifeBlood, count);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -229,7 +232,8 @@ public class EntityMosquito extends EntityMob {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10 + maxBloodLevel);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 10 + maxBloodLevel : (10 + maxBloodLevel) * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 2D : 2D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
 	}
 
@@ -308,6 +312,8 @@ public class EntityMosquito extends EntityMob {
 		for (int p1 = n; p1 < o; p1++)
 			for (int q1 = p; q1 < q; q1++)
 				for (int n2 = n1; n2 < o1; n2++) {
+					if (!worldObj.blockExists(p1, q1, n2))
+						continue;
 					Block o2 = worldObj.getBlock(p1, q1, n2);
 					if (o2.isAir(worldObj, p1, q1, n2))
 						continue;

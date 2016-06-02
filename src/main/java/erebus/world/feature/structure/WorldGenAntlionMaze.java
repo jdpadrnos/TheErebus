@@ -20,7 +20,7 @@ public class WorldGenAntlionMaze implements IWorldGenerator {
 		int chunkX = x;
 		int chunkZ = z;
 		int chunkY = 18;
-		if (random.nextInt(1024) == 0)
+		if (random.nextInt(ConfigHandler.INSTANCE.antlionMazeFrequency) == 0)
 			maze.generateSurface(world, random, chunkX, chunkY, chunkZ);
 	}
 }

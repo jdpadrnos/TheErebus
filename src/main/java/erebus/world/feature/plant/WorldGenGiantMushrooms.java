@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Direction;
+import net.minecraftforge.common.util.ForgeDirection;
 import erebus.ModBlocks;
 import erebus.core.helper.MathUtil;
 import erebus.world.feature.WorldGenErebus;
@@ -17,16 +18,24 @@ public class WorldGenGiantMushrooms extends WorldGenErebus {
 	private static final Block tempBlock = Blocks.bedrock;
 
 	public enum MushroomType {
-		BULB_CAPPED(ModBlocks.bigBulbCappedMushroom),
-		GRANDMAS_SHOES(ModBlocks.bigGreenMushroom),
-		SARCASTIC_CZECH(ModBlocks.bigBundleMushroom),
-		KAIZERS_FINGERS(ModBlocks.bigKaiserfingerMushroom),
-		DUTCH_CAP(ModBlocks.bigDutchCapMushroom);
+		BULB_CAPPED(ModBlocks.darkCapped, ModBlocks.bigBulbCappedMushroom),
+		GRANDMAS_SHOES(ModBlocks.grandmasShoes, ModBlocks.bigGreenMushroom),
+		SARCASTIC_CZECH(ModBlocks.sarcasticCzech, ModBlocks.bigBundleMushroom),
+		KAIZERS_FINGERS(ModBlocks.kaizersFinger, ModBlocks.bigKaiserfingerMushroom),
+		DUTCH_CAP(ModBlocks.dutchCap, ModBlocks.bigDutchCapMushroom);
 
-		public final Block block;
+		public final Block mushroom, log;
 
-		MushroomType(Block block) {
-			this.block = block;
+		MushroomType(Block mushroom, Block log) {
+			this.log = log;
+			this.mushroom = mushroom;
+		}
+
+		public static MushroomType getFromShroom(Block block) {
+			for (MushroomType type : values())
+				if (type.mushroom == block)
+					return type;
+			return null;
 		}
 	}
 
@@ -40,7 +49,7 @@ public class WorldGenGiantMushrooms extends WorldGenErebus {
 	@Override
 	protected boolean generate(int x, int y, int z) {
 		bulbs.clear();
-		Block mushroom = mushroomType.block;
+		Block mushroom = mushroomType.log;
 		boolean res = false;
 
 		switch (mushroomType) {
@@ -56,6 +65,8 @@ public class WorldGenGiantMushrooms extends WorldGenErebus {
 			case GRANDMAS_SHOES:
 				res = genGrandmasShoes(x - 1, y, z, mushroom);
 				break;
+			case SARCASTIC_CZECH:
+				res = genSarcasticCzech(x - 1, y, z, mushroom);
 			default:
 				break;
 		}
@@ -291,6 +302,49 @@ public class WorldGenGiantMushrooms extends WorldGenErebus {
 				bulbs.add(new ChunkCoordinates(x - 1 + b, y + height - 1, z - 3 + 7 * a));
 			}
 		}
+
+		return true;
+	}
+
+	/*
+	 * MUSHROOM TYPE - SARCASTIC CZECH
+	 */
+	private boolean genSarcasticCzech(int x, int y, int z, Block mushroom) {
+		int height = 2 + rand.nextInt(3);
+		int armLength = 4 + rand.nextInt(3);
+
+		if (!checkAirCube(x, y, z, x, y + height, z) || !checkAirCube(x - armLength, y + height, z - armLength, x + armLength, y + height + 1, z + armLength))
+			return false;
+	
+		setBlockPillar(x, z, y, y + height, mushroom, stalkMeta);
+		setBlockPillar(x + 1, z, y, y + height, mushroom, stalkMeta);
+		setBlockPillar(x, z + 1, y, y + height, mushroom, stalkMeta);
+		setBlockPillar(x + 1, z + 1, y, y + height, mushroom, stalkMeta);
+		y += height;
+
+		for (ForgeDirection[] dirs : new ForgeDirection[][] { new ForgeDirection[] { ForgeDirection.EAST, ForgeDirection.SOUTH }, new ForgeDirection[] { ForgeDirection.EAST, ForgeDirection.NORTH }, new ForgeDirection[] { ForgeDirection.WEST, ForgeDirection.SOUTH }, new ForgeDirection[] { ForgeDirection.WEST, ForgeDirection.NORTH } }) {
+			int xx = x + dirs[0].offsetX;
+			int yy = y;
+			int zz = z + dirs[0].offsetZ;
+			for (int i = 0; i < armLength; i++) {
+				if (i % 2 == 0)
+					yy++;
+				else {
+					ForgeDirection dir = dirs[rand.nextInt(dirs.length)];
+					xx += dir.offsetX;
+					zz += dir.offsetZ;
+				}
+				setBlock(xx, yy, zz, mushroom, stalkMeta);
+			}
+
+			setBlock(xx, yy + 1, zz, mushroom, bulbFullMeta);
+			for (int i = -1; i <= 1; i++)
+				for (int j = -1; j <= 1; j++)
+					setBlock(xx + i, yy, zz + j, mushroom, bulbFullMeta);
+		}
+
+		setBlockRect(x, z, x + 1, z + 1, y + 1, mushroom, bulbFullMeta);
+		setBlockRect(x - 1, z - 1, x + 2, z + 2, y, mushroom, bulbFullMeta);
 
 		return true;
 	}

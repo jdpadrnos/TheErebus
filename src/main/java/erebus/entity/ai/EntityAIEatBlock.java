@@ -3,21 +3,21 @@ package erebus.entity.ai;
 import java.awt.Point;
 import java.util.List;
 
+import erebus.core.helper.Spiral;
+import erebus.core.helper.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import erebus.core.helper.Spiral;
-import erebus.core.helper.Utils;
 
 public abstract class EntityAIEatBlock extends EntityAIBase {
 
 	/**
 	 * The bigger you make this value the faster the AI will be. But performance will also decrease so be sensible
 	 */
-	private static final int CHECKS_PER_TICK = 10;
+	private static final int CHECKS_PER_TICK = 3;
 
 	private final int EAT_SPEED;
 	protected final EntityLiving entity;

@@ -2,6 +2,9 @@ package erebus.entity;
 
 import java.util.Calendar;
 
+import erebus.client.render.entity.AnimationMathHelper;
+import erebus.core.handler.configs.ConfigHandler;
+import erebus.item.ItemMaterials;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -12,8 +15,6 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import erebus.client.render.entity.AnimationMathHelper;
-import erebus.item.ItemMaterials;
 
 public class EntityBotFly extends EntityMob {
 	// AKA ButtFly
@@ -37,9 +38,9 @@ public class EntityBotFly extends EntityMob {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(15.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(ConfigHandler.INSTANCE.mobHealthMultipier < 2 ? 15D : 15D * ConfigHandler.INSTANCE.mobHealthMultipier);
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(ConfigHandler.INSTANCE.mobAttackDamageMultiplier < 2 ? 1D : 1D * ConfigHandler.INSTANCE.mobAttackDamageMultiplier);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(8.0D);
 	}
 
@@ -248,9 +249,9 @@ public class EntityBotFly extends EntityMob {
 		int chance = rand.nextInt(4) + rand.nextInt(1 + looting);
 		int amount;
 		for (amount = 0; amount < chance; ++amount) {
-			entityDropItem(ItemMaterials.DATA.flyWing.createStack(), 0.0F);
+			entityDropItem(ItemMaterials.DATA.FLY_WING.makeStack(), 0.0F);
 			if (rand.nextInt(5) == 0)
-				entityDropItem(ItemMaterials.DATA.compoundEyes.createStack(), 0.0F);
+				entityDropItem(ItemMaterials.DATA.COMPOUND_EYES.makeStack(), 0.0F);
 		}
 	}
 

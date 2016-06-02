@@ -76,7 +76,7 @@ public final class TeleporterHandler {
 	}
 
 	private void transferEntity(Entity entity, int dimensionId) {
-		if (dimensionId != 0 && dimensionId != ConfigHandler.INSTANCE.erebusDimensionID)
+		if (dimensionId != 0 && dimensionId != 1 && dimensionId != ConfigHandler.INSTANCE.erebusDimensionID)
 			throw new IllegalArgumentException("Supplied invalid dimension ID into Erebus teleporter: " + dimensionId);
 
 		World world = entity.worldObj;
@@ -95,7 +95,8 @@ public final class TeleporterHandler {
 
 				waitingPlayers.put(player.getGameProfile().getId(), (byte) 40); // if there are any issues, we can either increase the number or rewrite the "is player in portal?" checking part
 				checkWaitingPlayers = true;
-
+				//NEEDS TO FIRE TWICE DUE TO SHITTY MOJANG CODE MAKING END TELEPORTING NOT WORK UNLESS THIS HAPPENS
+				player.mcServer.getConfigurationManager().transferPlayerToDimension(player, dimensionId, dimensionId == 0 ? teleportToOverworld : teleportToErebus);
 				player.mcServer.getConfigurationManager().transferPlayerToDimension(player, dimensionId, dimensionId == 0 ? teleportToOverworld : teleportToErebus);
 				player.timeUntilPortal = 0;
 				/*

@@ -48,19 +48,23 @@ public class EntityWebSling extends EntityThrowable {
 			int z = MathHelper.floor_double(posZ);
 
 			if (mop.entityHit != null) {
-				if (type == 0)
-					worldObj.setBlock(x, y, z, Blocks.web);
-				if (type == 1)
-					worldObj.setBlock(x, y, z, ModBlocks.witherWeb);
-				if (type == 2)
-					mop.entityHit.setFire(10);
-			} else if (mop.entityHit == null && Blocks.web.canPlaceBlockAt(worldObj, x, y, z) || mop.entityHit == null && Blocks.fire.canPlaceBlockAt(worldObj, x, y, z)) {
-				if (type == 0)
-					worldObj.setBlock(x, y, z, Blocks.web);
-				if (type == 1)
-					worldObj.setBlock(x, y, z, ModBlocks.witherWeb);
-				if (type == 2)
-					worldObj.setBlock(x, y, z, Blocks.fire);
+				if (Blocks.web.canPlaceBlockAt(worldObj, x, y, z))
+					if (type == 0)
+						worldObj.setBlock(x, y, z, Blocks.web);
+					else if (type == 1)
+						worldObj.setBlock(x, y, z, ModBlocks.witherWeb);
+				if (Blocks.fire.canPlaceBlockAt(worldObj, x, y, z))
+					if (type == 2)
+						mop.entityHit.setFire(10);
+			} else {
+				if (Blocks.web.canPlaceBlockAt(worldObj, x, y, z))
+					if (type == 0)
+						worldObj.setBlock(x, y, z, Blocks.web);
+					else if (type == 1)
+						worldObj.setBlock(x, y, z, ModBlocks.witherWeb);
+				if (Blocks.fire.canPlaceBlockAt(worldObj, x, y, z))
+					if (type == 2)
+						worldObj.setBlock(x, y, z, Blocks.fire);
 			}
 			if (!worldObj.isRemote)
 				setDead();
